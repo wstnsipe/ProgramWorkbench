@@ -1,0 +1,88 @@
+# Systems Engineering Plan (SEP) Outline v4.1
+# Prepared in accordance with the OSD Systems Engineering Plan Preparation Guide v4.1
+# Headings only – content is populated programmatically by docx_builder.build_sep()
+
+sections:
+  - level: 1
+    number: "1"
+    title: "Introduction"
+    children:
+      - {level: 2, number: "1.1", title: "Purpose and Scope"}
+      - {level: 2, number: "1.2", title: "Program Overview"}
+      - {level: 2, number: "1.3", title: "Reference Documents"}
+
+  - level: 1
+    number: "2"
+    title: "Technical Baseline and Program Description"
+    children:
+      - {level: 2, number: "2.1", title: "System Description"}
+      - {level: 2, number: "2.2", title: "Operational Concept (CONOPS)"}
+      - {level: 2, number: "2.3", title: "Technical Baseline Summary"}
+
+  - level: 1
+    number: "3"
+    title: "Systems Engineering Approach"
+    children:
+      - {level: 2, number: "3.1", title: "SE Process Overview"}
+      - {level: 2, number: "3.2", title: "Technical Planning and Control"}
+      - {level: 2, number: "3.3", title: "Requirements Management"}
+      - {level: 2, number: "3.4", title: "Interface Management"}
+      - {level: 2, number: "3.5", title: "Technical Reviews and Audits"}
+
+  - level: 1
+    number: "4"
+    title: "Technical Risk Management"
+    children:
+      - {level: 2, number: "4.1", title: "Risk Identification and Assessment"}
+      - {level: 2, number: "4.2", title: "Mitigation Strategies"}
+      - {level: 2, number: "4.3", title: "Technology Readiness Assessment"}
+
+  - level: 1
+    number: "5"
+    title: "Configuration Management and Technical Data"
+    children:
+      - {level: 2, number: "5.1", title: "Configuration Management Approach"}
+      - {level: 2, number: "5.2", title: "Technical Data Management"}
+      - {level: 2, number: "5.3", title: "Data Rights"}
+
+  - level: 1
+    number: "6"
+    title: "Modular Open Systems Approach (MOSA)"
+    children:
+      - {level: 2, number: "6.1", title: "MOSA Strategy Overview"}
+      - {level: 2, number: "6.2", title: "Module Identification and Boundaries"}
+      - {level: 2, number: "6.3", title: "Interface Standards and Control Documents"}
+      - {level: 2, number: "6.4", title: "Competitive Upgrade Path"}
+
+  - level: 1
+    number: "7"
+    title: "Verification and Validation"
+    children:
+      - {level: 2, number: "7.1", title: "Verification Strategy"}
+      - {level: 2, number: "7.2", title: "Validation Approach"}
+      - {level: 2, number: "7.3", title: "Test and Evaluation Summary"}
+
+  - level: 1
+    number: "8"
+    title: "Specialty Engineering"
+    children:
+      - {level: 2, number: "8.1", title: "Reliability, Availability, and Maintainability"}
+      - {level: 2, number: "8.2", title: "Software Systems Engineering"}
+      - {level: 2, number: "8.3", title: "Human Systems Integration"}
+      - {level: 2, number: "8.4", title: "Cybersecurity / Risk Management Framework"}
+      - {level: 2, number: "8.5", title: "Environment, Safety, and Occupational Health"}
+
+  - level: 1
+    number: "9"
+    title: "SE Organization and Resources"
+    children:
+      - {level: 2, number: "9.1", title: "Government SE Organization"}
+      - {level: 2, number: "9.2", title: "Contractor SE Organization"}
+      - {level: 2, number: "9.3", title: "SE Tools and Infrastructure"}
+
+  - level: 1
+    number: "10"
+    title: "Summary and Appendices"
+    children:
+      - {level: 2, number: "10.1", title: "Key Assumptions and Constraints"}
+      - {level: 2, number: "10.2", title: "Acronyms and Abbreviations"}

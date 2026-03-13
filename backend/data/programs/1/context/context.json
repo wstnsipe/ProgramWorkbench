@@ -1,0 +1,81 @@
+{
+  "program_id": 1,
+  "program_name": "Test Program",
+  "brief": {
+    "program_description": "This is a Class 1 small UAS program. It is an ISR platform that will have secondary missions of lethal payload and communications node. this is a very rapid program (likley under 18 months to production). ",
+    "dev_cost_estimate": 150000.0,
+    "production_unit_cost": 4500.0,
+    "attritable": true,
+    "sustainment_tail": true,
+    "software_large_part": true,
+    "mission_critical": true,
+    "safety_critical": true
+  },
+  "wizard_answers": {
+    "a_program_description": "this suas will be deployed with forward deployed units and will have a recon function. Additionally, it may be used to carry a lethal payload or it may be used to become a communications node for contested comms environments. key stakeholders are the user, contracting, budget folks, engineers, and program managers. ",
+    "b_dev_cost_estimate": "2",
+    "c_production_unit_cost": "4500",
+    "d_attritable_or_sustainment_tail": "attritable",
+    "e_similar_previous_programs": "yes the Raven and the Puma aircraft",
+    "f_tech_challenges_and_risk_areas": "the sensor for the ISR payload and the communications processor are low trl. ",
+    "g_mosa_scenarios": "i want to be able to buy a platform and then integrate any company's sensors, lethal payloads, and/or communication equipment. ",
+    "h_candidate_modules": "airframe, propulsion unit, battery, flight control computer, lethal payload, communications payload, ISR sensor payload.",
+    "i_known_standards_architectures_mapping": "MOD Payload",
+    "j_obsolescence_candidates": "the sensor ",
+    "k_commercial_solutions_by_module": "the lethal payload is cots",
+    "l_software_large_part": "yes",
+    "m_mission_or_safety_critical": "both",
+    "n_software_standards_architectures": "OCI and FACE",
+    "o_mosa_repo_searched": "yes"
+  },
+  "modules": [
+    {
+      "id": 4,
+      "name": "airframe, propulsion unit, battery, flight control computer, lethal payload, communications payload, ISR sensor payload.",
+      "rationale": "Identified for: This is a Class 1 small UAS program. It is an ISR platform that will have secondary missions of lethal payload and commu",
+      "key_interfaces": null,
+      "standards": "OCI and FACE",
+      "tech_risk": false,
+      "obsolescence_risk": false,
+      "cots_candidate": false
+    }
+  ],
+  "files": [
+    {
+      "id": 1,
+      "filename": "constraints.txt",
+      "extracted_text_chars": 0
+    },
+    {
+      "id": 2,
+      "filename": "description.txt",
+      "extracted_text_chars": 0
+    },
+    {
+      "id": 3,
+      "filename": "EXAEMPLAR_Acquisition Strategy .docx",
+      "extracted_text_chars": 208
+    },
+    {
+      "id": 4,
+      "filename": "EXAMPLE for MOSA_RFI.docx",
+      "extracted_text_chars": 11600
+    },
+    {
+      "id": 5,
+      "filename": "EXAEMPLAR_Acquisition Strategy .docx",
+      "extracted_text_chars": 156
+    },
+    {
+      "id": 8,
+      "filename": "EXAMPLE for MOSA_RFI.docx",
+      "extracted_text_chars": 11579
+    },
+    {
+      "id": 9,
+      "filename": "EXAEMPLAR_Acquisition Strategy .docx",
+      "extracted_text_chars": 10905
+    }
+  ],
+  "built_at": "2026-02-28T21:18:56.790372+00:00"
+}

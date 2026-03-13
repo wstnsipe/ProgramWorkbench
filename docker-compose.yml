@@ -1,0 +1,16 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: acq_workbench_db
+    environment:
+      POSTGRES_USER: acq
+      POSTGRES_PASSWORD: acqpass
+      POSTGRES_DB: acq_workbench
+    ports:
+      - "5433:5432"
+    volumes:
+      - acq_workbench_pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/01_init.sql
+
+volumes:
+  acq_workbench_pgdata:

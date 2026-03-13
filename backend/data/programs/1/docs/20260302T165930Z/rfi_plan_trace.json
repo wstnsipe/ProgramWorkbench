@@ -1,0 +1,220 @@
+{
+  "generated_at": "2026-03-02T16:59:30.253749+00:00",
+  "model": "gpt-5-mini",
+  "source_file_ids": [
+    8,
+    11,
+    4,
+    10,
+    9,
+    8,
+    11,
+    10,
+    9,
+    4,
+    4,
+    8
+  ],
+  "citations": {
+    "overview": [
+      6,
+      1
+    ],
+    "rfi_purpose": [
+      11
+    ],
+    "program_context": [
+      6,
+      1,
+      4,
+      11
+    ],
+    "mosa_requirements": [
+      1,
+      3,
+      6,
+      11
+    ],
+    "module_table_rows": [
+      6,
+      1,
+      11
+    ],
+    "questions_to_industry": [
+      1,
+      6,
+      11
+    ],
+    "requested_deliverables": [
+      1,
+      6,
+      4,
+      11
+    ],
+    "submission_instructions": []
+  },
+  "plan": {
+    "overview": "This Request for Information (RFI) seeks industry input for the Test Program \u2014 a Class 1 small UAS ISR platform with secondary missions for lethal payload delivery and operation as a communications node. The RFI focuses on modular open systems (MOSA) approaches to enable rapid integration of third\u2011party payloads, rapid production scale, and sustainment approaches for an attritable, software\u2011intensive, mission\u2011 and safety\u2011critical system.",
+    "rfi_purpose": "This RFI is market research to assess commercially available modular sUAS solutions, production capacity, and MOSA approaches and to inform acquisition planning. Responses should address statutory/policy compliance pathways including 2020 NDAA Sec. 848, 2023 NDAA Sec. 817, and the American Security Drone Act / 2024 NDAA provisions cited in program guidance or demonstrate a clear path to compliance.",
+    "program_context": "The Test Program is a Class 1 small UAS intended primarily for ISR (reconnaissance/surveillance/target acquisition) and secondarily to carry a lethal payload or serve as a communications node for contested communications environments. The program is attritable, software\u2011intensive, mission\u2011critical and safety\u2011critical, and is expected to be rapid in schedule (likely under 18 months to production). Key stakeholders include end users, contracting, budget authorities, engineering teams, and program managers.\n\nThe program target unit production cost and scale goals are aggressive to enable low\u2011cost, high\u2011volume fielding. Program artifacts and exemplar RFI guidance indicate an air vehicle unit cost objective (illustrative in exemplar material) and an accelerated production ramp: an initial deliverable capability by April 2026 with the ability to ramp to larger quantities (up to 10,000 units within 12 months) and a request to identify current inventory availability for immediate delivery. The acquisition approach emphasizes leveraging a vetted UAS Family of Systems architecture to align with existing industrial base solutions while using MOSA to enable third\u2011party payload integration and field reparability.\n\nThe program explicitly intends modularity scenarios that allow military modification and module removal/replacement without vendor involvement, support for MOD Payload compliant payloads, and clear, fully defined Modular System Interfaces (MSI). Technical risk areas called out for this program include low TRL elements in the ISR sensor and the communications processor; the lethal payload has been identified as a commercial (COTS) solution candidate in program inputs.",
+    "mosa_requirements": [
+      "Modular System Interfaces (MSI) must be defined for each candidate module (mechanical, electrical/power, data, and mounting interfaces) consistent with the MOD Payload modularity concept described in program guidance.",
+      "Software interfaces must support open architectures currently targeted by the program: OCI and FACE for applicable software components and application layering (program fact pack).",
+      "Design for field removability and repair without vendor involvement for replaceable modules (payloads, batteries, FCS, propulsion, etc.), including module removal, replacement, and basic repair guidance.",
+      "Contractors must document a licensing/data rights approach that enables military integration of third\u2011party MOD Payload compliant payloads without vendor intervention, describing any required technical data or software to enable integration.",
+      "Proposals must include an obsolescence mitigation plan for ISR sensors (identified obsolescence candidate) and for software\u2011driven obsolescence in communications processors.",
+      "Proposals must describe how modularity enables reuse of recovered modules from attritable vehicles and how modular design reduces sustainment tail costs for high production quantities.",
+      "Demonstrate or describe a path to compliance with the cited statutory/policy requirements for UAS acquisition and use (per program guidance).",
+      "Provide interface control documents (ICDs) and test artifacts sufficient to validate third\u2011party payload integration (mechanical, power, data throughput, timing, and cybersecurity boundaries)."
+    ],
+    "module_table_rows": [
+      {
+        "module_name": "airframe",
+        "rationale": "Primary structural and aerodynamic platform that supports modular payload mounting and system recoverability for an attritable sUAS.",
+        "key_interfaces": "Payload mounting latches, mechanical hardpoints, power distribution bus, data backbone, telemetry antenna attachments.",
+        "standards": "MOD Payload mounting concepts; leverage UAS Family of Systems architecture; mechanical and power MSI.",
+        "tech_risk": "No",
+        "obsolescence_risk": "No",
+        "cots_candidate": "No"
+      },
+      {
+        "module_name": "propulsion unit",
+        "rationale": "Provides thrust/propulsion; selected for cost, maintainability, and compatibility with rapid production and attritable use.",
+        "key_interfaces": "Mechanical mounting, power/control signal interface to flight control computer, thermal and vibration constraints.",
+        "standards": "Mechanical MSI, power and control signal interfaces per program MSI requirements.",
+        "tech_risk": "No",
+        "obsolescence_risk": "No",
+        "cots_candidate": "No"
+      },
+      {
+        "module_name": "battery",
+        "rationale": "Primary energy source sized for mission endurance and swappable to support rapid turnaround and sustainment in the field.",
+        "key_interfaces": "Electrical power connector, battery management system (BMS) data link, mechanical retention/release.",
+        "standards": "Electrical power MSI and BMS data interface; safe handling and charging interface per program guidance.",
+        "tech_risk": "No",
+        "obsolescence_risk": "No",
+        "cots_candidate": "No"
+      },
+      {
+        "module_name": "flight control computer",
+        "rationale": "Onboard autonomy/stability core and integration hub for sensors, comms, and payloads; software\u2011intensive and safety\u2011critical.",
+        "key_interfaces": "Data buses to sensors/payloads, control signal outputs to propulsion, timing/GNSS inputs, health monitoring outputs.",
+        "standards": "OCI and FACE for software components; MSI for hardware interfaces; UAS Family of Systems architecture alignment.",
+        "tech_risk": "Low (software complexity)",
+        "obsolescence_risk": "No",
+        "cots_candidate": "No"
+      },
+      {
+        "module_name": "lethal payload",
+        "rationale": "Secondary mission module identified as a COTS candidate to enable rapid fielding of lethality capability where authorized.",
+        "key_interfaces": "Mechanical mounting, power provisioning, weapons control interface to flight control computer, safety interlocks.",
+        "standards": "MOD Payload mounting and MSI; software and safety control interfaces per program safety policy.",
+        "tech_risk": "No",
+        "obsolescence_risk": "No",
+        "cots_candidate": "Yes"
+      },
+      {
+        "module_name": "communications payload",
+        "rationale": "Provides contested-environment communications relay and node capability; integrates datalinks and comms processors to extend unit communications.",
+        "key_interfaces": "Data interfaces (high-throughput comms bus), RF antenna connectors, power, thermal management interfaces.",
+        "standards": "MOD Payload MSI for payloads; data and power MSI; alignment with UAS Family of Systems architecture.",
+        "tech_risk": "Yes (communications processor TRL low)",
+        "obsolescence_risk": "No",
+        "cots_candidate": "No"
+      },
+      {
+        "module_name": "ISR sensor payload",
+        "rationale": "Primary ISR sensor suite for RSTA missions; modular to allow rapid swaps and obsolescence management.",
+        "key_interfaces": "High-bandwidth data interface, power, mechanical mounting with geolocation/alignment references, thermal and EMI considerations.",
+        "standards": "MOD Payload MSI; data interface standards; OCI/FACE for any onboard processing software.",
+        "tech_risk": "Yes (sensor TRL low)",
+        "obsolescence_risk": "Yes (identified obsolescence candidate)",
+        "cots_candidate": "No"
+      }
+    ],
+    "questions_to_industry": [
+      "Describe how your proposed platform and modules implement Modular System Interfaces (MSI) and MOD Payload compatibility for third\u2011party payload integration. Provide sample ICDs or interface drawings.",
+      "Confirm compliance or provide a documented path to compliance with 2020 NDAA Sec. 848, 2023 NDAA Sec. 817, and the American Security Drone Act / 2024 NDAA provisions referenced in program guidance, or explain gaps and mitigation plans.",
+      "Provide evidence of OCI and FACE conformance for applicable software components and describe the software partitioning and runtime environment for flight control and payload processing.",
+      "Provide a production plan showing ability to meet an initial delivery capability by April 2026 and the ability to ramp production to larger quantities (example program guidance up to 10,000 units within 12 months). Indicate current inventory of complete systems available for immediate delivery.",
+      "State unit cost projections for the air vehicle and identify assumptions (targeted exemplar guidance includes a unit objective referenced in program documents).",
+      "Describe repair\u2011and\u2011replace procedures enabling military removal and replacement of modules without vendor involvement, including tooling and authorized personnel skill levels.",
+      "Describe obsolescence mitigation strategies for ISR sensors and communications processors (identified program risk areas), including lifecycle parts sourcing, swappable sensor module approaches, and re\u2011hosting plans.",
+      "For the lethal payload module: confirm COTS status, provide safety interlock descriptions, and describe how integration with flight controls and mission planning will be controlled.",
+      "Provide proposed data rights and technical data deliverables that would enable government integration of third\u2011party payloads and field repairs without vendor software or technical support.",
+      "Provide cybersecurity boundary descriptions for each module and a plan for verifying data integrity and authentication when third\u2011party payloads are integrated."
+    ],
+    "requested_deliverables": [
+      "Interface Control Documents (ICDs) and Modular System Interface (MSI) specifications for each module (mechanical, electrical/power, data, thermal, and mounting).",
+      "Sample software architecture diagrams showing OCI / FACE conformance and software partitioning for flight control and payload processing.",
+      "Obsolescence mitigation plan for ISR sensors and communications processors, including forecasts for critical component lifecycles and substitution strategies.",
+      "Production capability statement showing schedule to initial capability (indicate ability to support initial deliveries by April 2026 per program guidance), ramp to larger quantities, and current inventory of complete systems available for immediate delivery.",
+      "Detailed safety and weapon integration documentation for lethal payloads (if proposing weaponized configurations) and operational safety interlocks.",
+      "Repairability and field maintenance plan enabling removal/replacement of modules without vendor intervention (tooling lists, training needs, depot vs. field maintenance split).",
+      "Cost model and unit cost assumptions for air vehicle and modular replacements (identify assumptions and risk areas).",
+      "Proposed data rights, license terms, and list of technical data/software deliverables required to enable third\u2011party payload integration and government repairability.",
+      "Test and demonstration plan showing how third\u2011party MOD Payload compliant payloads will be integrated and verified on the platform (including cybersecurity and interoperability tests)."
+    ],
+    "submission_instructions": [],
+    "sources_used": [
+      {
+        "file_id": 8,
+        "filename": "EXAMPLE for MOSA_RFI.docx",
+        "excerpt": "Production capability to deliver an initial quantity of systems by April 2026, with the ability to quickly ramp production and deliver larger quantities up to 10,000 units within 12 months. Please also indicate your current inventory of complete systems ready for immediate delivery."
+      },
+      {
+        "file_id": 4,
+        "filename": "EXAMPLE for MOSA_RFI.docx",
+        "excerpt": "The following are MOSA scenarios to inform modularity decisions and data rights licensing needs: The program desires the ability for the military to modify, within reason, the system with a variety of third-party MOD Payload compliant payloads, armaments, and munitions without vendor involvement. The program desires the ability for the military to repair the system without vendor involvement."
+      },
+      {
+        "file_id": 10,
+        "filename": "EXAEMPLAR_Acquisition Strategy .docx",
+        "excerpt": "Due to the MOSA intended for this program, the technical approach will be leverage the existing UAS Family of Systems Architecture that has been robustly vetted with industry during past UAS programs and as such has resulted in much of industry aligning commercial solutions with this architecture."
+      },
+      {
+        "file_id": 11,
+        "filename": "EXAMPLE for MOSA_RFI.docx",
+        "excerpt": "This Sources Sought is for market research purposes to assess commercially available modular Small Unmanned Aircraft Systems (SUAS) systems and evaluate the commercial industrial base to achieve production scale to quantities in the thousands. Therefore, the UAS must be 2020 NDAA Sec 848, 2023 NDAA Sec 817, and American Security Drone Act of 2023 (2024 NDAA, PL 118-31, DIV A, Title XVIII, Subtitle B, SEC. 1821) compliant or demonstrate a path to compliance."
+      }
+    ],
+    "citations": {
+      "overview": [
+        6,
+        1
+      ],
+      "rfi_purpose": [
+        11
+      ],
+      "program_context": [
+        6,
+        1,
+        4,
+        11
+      ],
+      "mosa_requirements": [
+        1,
+        3,
+        6,
+        11
+      ],
+      "module_table_rows": [
+        6,
+        1,
+        11
+      ],
+      "questions_to_industry": [
+        1,
+        6,
+        11
+      ],
+      "requested_deliverables": [
+        1,
+        6,
+        4,
+        11
+      ],
+      "submission_instructions": []
+    }
+  }
+}

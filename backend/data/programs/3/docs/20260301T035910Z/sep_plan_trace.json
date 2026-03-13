@@ -1,0 +1,233 @@
+{
+  "generated_at": "2026-03-01T03:59:10.670253+00:00",
+  "model": "gpt-5-mini",
+  "chunk_ids_used": [],
+  "plan": {
+    "title_block": {
+      "program_name": "SEP Smoke Test",
+      "organization": "Program Executive Office, Digital Engineering (PEO-DE)",
+      "date": "March 2026",
+      "version": "1.0"
+    },
+    "executive_summary": "This Systems Engineering Plan (SEP) documents the tailored systems engineering approach for the SEP Smoke Test program \u2014 a 12-month, pre-Milestone A effort to validate and demonstrate a repeatable, model-based Systems Engineering (MBSE) and Modular Open Systems Approach (MOSA) process for small acquisition programs. The SEP Smoke Test will exercise requirements development, architecture definition, verification planning, configuration management, and digital-thread linkages using a representative integration of COTS modules and a lightweight integration bus. Deliverables include a Functional Baseline, Allocated Baseline, Product Baseline for the demonstrator, verification artifacts, and a lessons-learned report for scaling the approach to larger programs.\n\nThe SEP's purpose is both technical and procedural: to prove that the selected toolchain and SE processes (requirements management, architecture, interfaces, V&V, configuration control, and risk management) can produce traceable, review-ready artifacts that meet Defense acquisition expectations. This program-specific SEP describes scheduled technical reviews, roles and responsibilities, risk mitigations, specialty engineering treatments (cybersecurity, safety, HSI, reliability, and maintainability), and data and configuration management practices tailored to the SEP Smoke Test's demonstrator scope and limited funding profile.",
+    "program_overview": "SEP Smoke Test is scoped as a risk-reduction demonstration to validate systems engineering practices and digital engineering tooling in support of rapid acquisition. The program\u2019s mission is to field a small demonstrator system consisting of three modular elements (sensor/ingest, processing, and operator interface) integrated via an open integration bus to validate requirements flow-down, MOSA concepts, and automated verification reporting. The demonstrator leverages COTS processing nodes with custom integration software to minimize hardware development and focus on SE process validation.\n\nTechnically, the program adopts an MBSE-centric approach: develop and maintain SysML models that capture requirements, architecture, behavioral sequences, and verification links. The program will run iterative 6\u20138 week delivery sprints culminating in five formal technical reviews (SRR, SFR, PDR, CDR, TRR) to establish baselines aligned to demonstration milestones. SEP Smoke Test is in the Pre-Milestone A (Technology Maturation and Risk Reduction) phase and will produce exit artifacts that inform a decision point on scaling the practices across an acquisition portfolio.",
+    "se_strategy": "The systems engineering strategy is iterative and model-driven. SEP Smoke Test will implement a tailored ISO/IEC/IEEE 15288 process model emphasizing requirements engineering, architecture definition, interface control, verification planning, and risk-driven development. MBSE will be the primary repository for system models and traceability; lightweight document artifacts (SRS, ICDs, Test Plans) will be generated from and synchronized with the model.\n\nKey SE activities include: (1) Capability-to-requirements translation workshops with stakeholders to produce and baseline capability and system requirements; (2) Architecture definition using SysML and a defined module decomposition that supports MOSA principles; (3) Interface Control Working Group (ICWG) sessions to finalize ICDs; (4) Risk identification and continuous mitigation with risk owners assigned; (5) Iterative V&V planning tied to model-based verification matrices; and (6) Configuration management using an integrated CM toolchain across artifacts, models, and software. The SE process will be demonstrated end-to-end on the demonstrator so that both technical and process lessons can be captured for broader adoption.",
+    "tech_reviews": [
+      {
+        "name": "System Requirements Review (SRR)",
+        "purpose": "Confirm that stakeholder and capability requirements are complete, consistent, and testable; establish the Functional Baseline for the demonstrator.",
+        "entry_criteria": "Draft Capability Description, initial stakeholder list, preliminary concept of operations (ConOps), initial MBSE model with high-level use cases, draft Acquisition Strategy (file 6 excerpt referenced), and approved SEP draft.",
+        "exit_criteria": "Functional Baseline established and signed by Program Manager and SE Lead; agreed-to verification approach at a high level; schedule for subsequent reviews; open risks captured in risk register with owners.",
+        "artifacts": [
+          "Functional Baseline (FBL) package",
+          "System Requirements Specification (SRS) - initial",
+          "ConOps document",
+          "High-level SysML model (requirements diagrams)",
+          "SRR minutes and action item list"
+        ]
+      },
+      {
+        "name": "System Functional Review (SFR)",
+        "purpose": "Validate the allocation of functional requirements to candidate modules and confirm that functional design options satisfy the Functional Baseline.",
+        "entry_criteria": "Signed Functional Baseline, updated SysML functional decomposition, candidate module definitions, initial MOSA analysis (based on MOSA RFI considerations from file 7), and preliminary risk mitigations.",
+        "exit_criteria": "Functional allocation to modules approved; updated requirements traceability matrix demonstrating allocation to functions; MOSA compliance findings and recommended architectural patterns documented.",
+        "artifacts": [
+          "Allocated functional diagrams (SysML)",
+          "MOSA Assessment Report",
+          "Updated Requirements Traceability Matrix (RTM)",
+          "ICWG minutes identifying interface candidates"
+        ]
+      },
+      {
+        "name": "Preliminary Design Review (PDR)",
+        "purpose": "Demonstrate that system architecture, module design choices, and allocated requirements provide a feasible path to meet performance, schedule, and cost objectives; establish the Allocated Baseline (ABL).",
+        "entry_criteria": "SFR outcomes, preliminary hardware/software designs for each module, ICD drafts, performance analyses, updated RAM estimates, preliminary test/verification plans, and CM plan draft.",
+        "exit_criteria": "Allocated Baseline signed; PDR findings closed or tracked with acceptable mitigation plans; verification matrix linked to allocated requirements; preliminary build/test schedule approved.",
+        "artifacts": [
+          "Allocated Baseline (ABL) package",
+          "Module design descriptions",
+          "Interface Control Documents (draft ICDs)",
+          "Preliminary Test and Verification Plan (TVP)",
+          "Preliminary RAM Report"
+        ]
+      },
+      {
+        "name": "Critical Design Review (CDR)",
+        "purpose": "Confirm that detailed design meets all allocated requirements and is ready for build and integration; establish the Product Baseline (PBL) for the demonstrator hardware/software deliverables.",
+        "entry_criteria": "Completed detailed designs, final ICDs, manufacturing/procurement plans for COTS/modified COTS items, updated RAM and safety assessments, and test harness designs.",
+        "exit_criteria": "Product Baseline approved; build and integration timeline released; all critical discrepancies captured with mitigation plans; readiness to begin fabrication/integration and formal verification execution.",
+        "artifacts": [
+          "Product Baseline (PBL) package",
+          "Final ICDs",
+          "Detailed Interface and Software Design Documents",
+          "Manufacturing/Fabrication Build Packages",
+          "Updated Safety Assessment and RAM report"
+        ]
+      },
+      {
+        "name": "Test Readiness Review (TRR)",
+        "purpose": "Verify that hardware, software, test environments, procedures, and instrumentation are ready to execute planned verification and validation testing for the demonstrator.",
+        "entry_criteria": "Integrated test article or demonstrator pre-assembly, completed test procedures, instrumentation installed, trained test personnel, and test data management plan.",
+        "exit_criteria": "Approval to execute test campaign; acceptance criteria for each test declared and traceable to requirements; test risk mitigations in place and contingency plans approved.",
+        "artifacts": [
+          "Test Procedures and Plans",
+          "Test Environment and HIL setup documentation",
+          "Instrumentation Calibration records",
+          "Test Data Management Plan",
+          "TRR minutes and 'go/no-go' decision record"
+        ]
+      }
+    ],
+    "requirements_traceability": {
+      "approach": "Requirements will be managed as living elements inside an MBSE environment. High-level capability requirements will be decomposed into system and allocated requirements using facilitated workshops; each requirement will have a unique identifier and be linked bidirectionally to design elements, verification methods, and test cases. Change impacts will be analyzed using automated traceability queries prior to approval of any change.",
+      "tools": "IBM Engineering DOORS Next for authoritative requirements capture, Cameo Systems Modeler (NoMagic)/MagicDraw for SysML models, Jira for action/issue tracking, GitLab for software baseline and artifact versioning, and an OSLC bridge to maintain live links between DOORS Next and the MBSE model.",
+      "digital_thread_notes": "The digital thread will be implemented by connecting DOORS Next and SysML models via OSLC links so that requirement-to-model-to-test traces are continuously maintained. Verification results will be ingested back into the model and DOORS Next so that verification status is visible in dashboards and can be used to automatically generate verification reports required for reviews (PDR, CDR, TRR)."
+    },
+    "architecture_mosa": {
+      "mosa_approach": "Adopt a pragmatic MOSA for the demonstrator: enforce decoupling via well-defined, minimal interfaces, prefer COTS modules with standard interfaces, and ensure replaceability of processing and user interface modules. Interface standardization will be prioritized where multiple programs could reuse the modules.",
+      "modules_summary": "Defined modules: (1) Sensor/Ingest Module (COTS board + adapter) responsible for data acquisition and pre-filtering; (2) Processing Module (COTS compute node running containerized algorithms) responsible for data processing and analytics; (3) Integration Bus Module (lightweight middleware for message routing, data translation); (4) Operator Interface Module (web-based UI running on secure client). Decomposition rationale: isolate domain-specific processing from transport and display to enable independent upgrades and reuse.",
+      "interfaces_summary": "Primary interfaces: Sensor-to-Bus (binary-formatted data stream with manifest), Bus-to-Processing (message-based APIs, REST/gRPC and data model with JSON schema), Processing-to-Operator (well-defined REST APIs and WebSocket for streaming). An Interface Control Working Group (ICWG) will produce ICDs for each interface. Interface enforcement will use automated schema checks, middleware versioning, and conformance test harnesses.",
+      "standards_summary": "Applicable open standards: SOSA (for modular sensor/processing concepts and hardware abstraction), OpenAPI (for REST interface contracts), DDS where low-latency publish/subscribe is required, FACE concepts for portability of software modules, and POSIX/container standards for compute nodes. Mapping: Sensor/Ingest aligns to SOSA hardware abstractions; Integration Bus uses DDS/OpenAPI depending on use case; Processing modules packaged as containers per OCI standards."
+    },
+    "risk_register": [
+      {
+        "risk": "Incomplete or ambiguous stakeholder requirements",
+        "cause": "Compressed schedule and multiple stakeholders with differing priorities cause rushed or conflicting requirement inputs.",
+        "likelihood": "Medium",
+        "impact": "High",
+        "mitigation": "Conduct structured requirements workshops within first 6 weeks, enforce requirement entry formats with acceptance criteria, baseline Functional Baseline at SRR, assign requirements owner for each stakeholder area, and use requirement reviews to close ambiguities.",
+        "owner": "SE Lead (Jane Carter)"
+      },
+      {
+        "risk": "MBSE and requirements toolchain interoperability failure",
+        "cause": "OSLC bridges or data synchronization between DOORS Next and Cameo not fully validated; versioning conflicts.",
+        "likelihood": "Medium",
+        "impact": "Medium",
+        "mitigation": "Allocate dedicated Digital Engineering Lead resource to validate toolchain early, perform incremental sync tests in sprint 1, maintain canonical authoritative source rules, and prepare fallback manual sync procedures for critical artifacts.",
+        "owner": "Digital Engineering Lead (Michael Ortiz)"
+      },
+      {
+        "risk": "COTS integration performance shortfalls",
+        "cause": "COTS compute and sensor modules do not meet latency or throughput requirements during integrated testing.",
+        "likelihood": "Medium",
+        "impact": "High",
+        "mitigation": "Define clear performance acceptance criteria during SRR/PDR, include performance margins in requirements, reserve schedule for one integration iteration prior to CDR, and identify alternate COTS suppliers as contingency.",
+        "owner": "Integration Lead (Priya Singh)"
+      },
+      {
+        "risk": "Delayed cybersecurity RMF package completion causing test delays",
+        "cause": "Underestimation of RMF tasks and control implementation effort; late discovery of required STIGs or control tailoring.",
+        "likelihood": "Medium",
+        "impact": "High",
+        "mitigation": "Initiate RMF scoping and categorization in month 1, embed cybersecurity controls into design from PDR, hold monthly RMF checkpoints, and allocate cybersecurity engineer to sprint teams to remediate findings early.",
+        "owner": "Information Assurance Manager (LtCol David Hsu)"
+      },
+      {
+        "risk": "Insufficient test environment fidelity for validation",
+        "cause": "Test harness and HIL are underspecified and not available in time for TRR.",
+        "likelihood": "Low",
+        "impact": "Medium",
+        "mitigation": "Define TRR entry criteria early, build test environment incrementally, prioritize reusable test assets, and schedule a pre-TRR dry run two weeks prior to TRR.",
+        "owner": "Test Lead (Sara Ahmed)"
+      }
+    ],
+    "config_mgmt": {
+      "approach": "Configuration management will be implemented via a lightweight, auditable process integrating model artifacts, documents, and software. Software baselines will be maintained in GitLab with tags for baseline releases; MBSE artifacts and DOORS Next artifacts will be versioned and controlled via a CMDB. A program Integrated Configuration Control Board (ICCB) will adjudicate changes to baselined items. All configuration items will be uniquely identified and uploaded to the program CM repository prior to formal baseline events.",
+      "baselines": [
+        "Functional Baseline (FBL) at SRR",
+        "Allocated Baseline (ABL) at PDR",
+        "Product Baseline (PBL) at CDR",
+        "Test Baseline prior to TRR"
+      ],
+      "change_control": "Engineering Change Proposals (ECPs) will be submitted through Jira as Change Requests with defined fields for impact, affected baselines, and proposed implementation. The ICCB meets weekly to triage changes: categorizing as urgent, minor, or major. Major changes require impact analyses (schedule, cost, requirements, verification), updated RTM, and formal ICCB approval. Approved ECPs are tracked to closure and artifacts re-baselined with updated version tags in the CM repository."
+    },
+    "vnv": {
+      "strategy": "Verification and Validation (V&V) for the SEP Smoke Test will be model-centric and risk-driven. Verification activities will map back to the RTM in the MBSE environment to provide automated pass/fail rollups for reviews. Early verification consists of unit and module-level tests executed by developers (including static analysis and unit tests for software containers), followed by integration testing using hardware-in-the-loop (HIL) and simulation-driven test cases. System-level acceptance testing will be executed against the Product Baseline using representative operational scenarios defined in the ConOps. Validation will involve end-user representatives verifying that the demonstrator meets the capability needs captured in the ConOps.",
+      "test_levels": [
+        "Unit Testing",
+        "Module/Component Integration Testing",
+        "System Integration Testing (HIL)",
+        "Regression Testing",
+        "System Acceptance Testing (Government directed)"
+      ],
+      "acceptance_criteria": "Acceptance criteria are defined per requirement in the RTM. Success metrics for demonstrator acceptance include: (1) >=95% of prioritized requirements verified with 'pass' outcomes or approved waivers; (2) performance metrics within defined margins (e.g., end-to-end latency <= specified threshold, throughput >= specified throughput); (3) RAM targets met (e.g., MTBF target for processing node met or demonstrated by accelerated testing); and (4) cybersecurity controls implemented to the agreed RMF Categorization with no unresolved high-risk findings."
+    },
+    "data_mgmt": {
+      "data_items": [
+        "DI-SESS-81785 Systems Engineering Plan (this document)",
+        "System Requirements Specification (SRS)",
+        "Interface Control Documents (ICDs)",
+        "System Architecture Model (SysML) and exports",
+        "Test and Verification Plan (TVP) and Test Reports",
+        "Configuration Management Plan and Baseline Packages",
+        "RAM and Safety Assessment Reports",
+        "Cybersecurity Plan and RMF Artifacts"
+      ],
+      "data_rights_strategy": "The program will seek Government Purpose Rights for developed software components to permit internal reuse and further development, and unlimited rights for technical data where feasible. COTS components will be integrated under vendor license terms; where vendor data restricts government reuse, the program will negotiate license terms or identify alternate solutions. All rights assertions will be documented in the contract Data Rights Appendix and managed per DFARS/DoD guidance.",
+      "repo_notes": "Authoritative repositories: DOORS Next (requirements), Cameo SysML repository (architecture models) with periodic exports stored in the program CM repository, GitLab (software source, CI/CD artifacts), and SharePoint/ShareFile for non-model documents. OSLC connectors will be configured between DOORS Next and Cameo to maintain the digital thread. All verified test data will be archived in a secure test data repository with controlled access for reproducibility and audit."
+    },
+    "specialty_eng": {
+      "cyber": "Cybersecurity will follow the RMF process (NIST SP 800-53 controls tailored to the system categorization). Program activities include early system categorization, definition of security architecture, integration of STIGs for compute nodes, secure container practices, static/dynamic code scanning in CI pipelines, and continuous monitoring plans. An ATO strategy will be developed as part of the Cybersecurity Plan, and cybersecurity artifacts (SSP, SAR, POA&M) will be maintained and iteratively updated during integration and testing.",
+      "safety": "System safety will conform to MIL-STD-882E guidance tailored to the demonstrator scope. A Preliminary Hazard Analysis (PHA) will be performed prior to PDR, followed by a System Safety Assessment supporting CDR. Safety tasks include hazard identification, risk assessment (severity and probability), mitigation implementation, verification of mitigations during system testing, and generation of a Safety Assessment Report capturing all residual risks and safety-critical procedures.",
+      "airworthiness": "Not applicable \u2013 SEP Smoke Test demonstrator is a ground/software integration testbed and does not involve aircraft or components requiring airworthiness certification.",
+      "human_factors": "Human Systems Integration (HSI) activities will focus on operator interface usability and task design. HSI tasks include user role definition, workload analysis, early UI prototyping with iterative usability testing, allocation of functions between operator and automation, and development of operator procedures. Human factors findings will be captured in the RTM and verified during system acceptance testing with representative users.",
+      "reliability": "Reliability engineering will define quantitative reliability requirements (e.g., MTBF targets for processing modules) and perform RAM analysis early to drive design margins. Failure mode and effects analysis (FMEA) will be conducted at the module level prior to CDR; accelerated life testing and stress testing will be used to validate MTBF estimates for critical components. Reliability growth tracking will be included in verification activities.",
+      "maintainability": "Maintainability will be addressed by designing modules for rapid LRUs replacement and software update via containerized deployments. Maintenance tasks will be documented in Maintenance Task Analyses; mean time to repair (MTTR) targets will be defined and validated via depot and field-level maintenance exercises. Supportability considerations include spare parts strategy, minimal required toolset, and remote diagnostic capabilities to minimize on-site interventions."
+    },
+    "appendices": {
+      "glossary": [
+        {
+          "term": "MBSE",
+          "definition": "Model-Based Systems Engineering \u2014 the formalized application of modeling to support system requirements, design, analysis, verification and validation activities."
+        },
+        {
+          "term": "MOSA",
+          "definition": "Modular Open Systems Approach \u2014 an approach that emphasizes modular design and open standards to improve competition, upgradeability, and interoperability."
+        },
+        {
+          "term": "RTM",
+          "definition": "Requirements Traceability Matrix \u2014 mapping of requirements through design, implementation, and verification artifacts."
+        },
+        {
+          "term": "ICD",
+          "definition": "Interface Control Document \u2014 a document that defines the interface between two system elements."
+        },
+        {
+          "term": "FBL",
+          "definition": "Functional Baseline \u2014 the baseline that captures the approved functional requirements for a system."
+        },
+        {
+          "term": "ABL",
+          "definition": "Allocated Baseline \u2014 the baseline capturing allocated requirements to subsystems and interfaces."
+        },
+        {
+          "term": "PBL",
+          "definition": "Product Baseline \u2014 the baseline capturing the final product configuration including hardware and software details ready for production or build."
+        }
+      ],
+      "references": [
+        "DoDI 5000.02, Operation of the Adaptive Acquisition Framework",
+        "Office of the Secretary of Defense Systems Engineering (OSE) SEP Guide v4.1",
+        "DoD Instruction 5000.88, Intellectual Property (IP) and Ownership in Defense Acquisition",
+        "NIST SP 800-53, Security and Privacy Controls for Federal Information Systems and Organizations",
+        "MIL-STD-882E, Standard Practice for System Safety",
+        "ISO/IEC/IEEE 15288, Systems and Software Engineering \u2014 System Life Cycle Processes",
+        "Defense Acquisition Guidebook (DAG)",
+        "SOSA Technical Standard, Open Architecture principles for sensor and processing modules",
+        "FACE Technical Standard for software portability and component reuse"
+      ]
+    },
+    "sources_used": [
+      {
+        "file_id": 6,
+        "filename": "EXAEMPLAR_Acquisition Strategy .docx",
+        "excerpt": "Acquisition strategy fragments the SEP Smoke Test into a 12-month risk-reduction demonstration to validate SE tools and processes; it notes the need for a concise Functional Baseline at SRR and iterated baselines through CDR."
+      },
+      {
+        "file_id": 7,
+        "filename": "EXAMPLE for MOSA_RFI.docx",
+        "excerpt": "MOSA RFI guidance highlights modular partitioning, interface standardization, and recommended industry standards (SOSA/OpenAPI/DDS) to be considered during architecture definition and ICD development."
+      }
+    ]
+  }
+}

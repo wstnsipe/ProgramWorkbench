@@ -1,0 +1,245 @@
+{
+  "generated_at": "2026-03-01T17:17:07.001103+00:00",
+  "model": "gpt-5-mini",
+  "chunk_ids_used": [],
+  "plan": {
+    "title_block": {
+      "program_name": "Test Program",
+      "organization": "Program Executive Office Aviation",
+      "date": "March 2026",
+      "version": "1.0"
+    },
+    "executive_summary": "This Systems Engineering Plan (SEP) documents the systems engineering approach for the Test Program, a Class 1 small Unmanned Aircraft System (sUAS) intended primarily as an ISR platform with secondary missions of lethal payload carriage and operation as a contested-environment communications node. The program is flagged attritable, software-intensive, mission- and safety-critical, and is executing an accelerated acquisition timeline with estimated transition to production within approximately 18 months. The SEP establishes the SE activities, technical reviews, configuration management, verification/validation, risk management, and specialty engineering approaches tailored to these program drivers.\n\nThe SEP supports a Modular Open Systems Approach (MOSA) to enable procurement of a common platform and rapid integration of third-party sensors, communications modules, and lethal payloads using OCI- and FACE-conformant interfaces. The plan emphasizes rapid decision gates, early engagement with the Service Airworthiness Authority and Cyber/RMF authorities, aggressive mitigation for two identified low-TRL components (ISR sensor and communications processor), and a streamlined data and configuration control posture to support fast production and sustainment of attritable units. This SEP is a living document and will be revised at each major technical review and as risk posture or stakeholder direction evolves.",
+    "program_overview": "The Test Program delivers a small, portable Class 1 sUAS for forward-deployed units to perform reconnaissance and intelligence, surveillance, and reconnaissance (ISR) missions. Secondary mission sets include carriage and delivery of a lethal payload (COTS lethal payload candidate) and operation as a communications node to extend or operate in contested communications environments. The program leverages heritage designs (Raven and Puma analogs) to minimize airframe development effort while adopting a MOSA to permit rapid integration of third-party payloads.\n\nTechnical approach centers on a common airframe and propulsion/battery baseline with defined modular payload interfaces (electrical, mechanical, data/comms, power). Candidate modules include airframe, propulsion unit, battery, flight control computer, lethal payload, communications payload, and ISR sensor payload. Software baseline will use OCI and FACE guidance for payload-host interaction. The program is currently in pre-Systems Acquisition phase preparing for quick development and demonstration activities with an aggressive schedule to initial production under 18 months.",
+    "se_strategy": "The overall systems engineering approach is iterative and risk-driven to meet the accelerated schedule while ensuring safety-critical and mission-critical requirements are satisfied. The program adopts a spiral SE process aligned to major technical reviews (SRR, SFR, PDR, CDR, TRR) timed to deliver progressively mature baselines: Functional Baseline at SRR, Allocated Baseline at PDR, and Product Baseline at CDR. Continuous integration and digital engineering practices will be used to shorten feedback loops for software and payload integration.\n\nKey SE activities include: requirements decomposition with formal traceability, MOSA interface definition and certification for payload integration, early hazard analysis and safety-critical design for lethal payload carriage, RMF/Cybersecurity boundary definition and evidence generation, and an aggressive verification program using Hardware-in-the-Loop (HIL) and flight test campaigns. Given the attritable design and rapid timeframe, the SE emphasis is on modularity, clear ICDs, supplier integration, and pre-validated COTS payload integration demonstrations to reduce integration risk.",
+    "tech_reviews": [
+      {
+        "name": "System Requirements Review (SRR)",
+        "purpose": "Confirm stability and completeness of system-level requirements, establish the Functional Baseline, and validate initial MOSA/interface requirements to allow concurrent payload integration planning.",
+        "entry_criteria": "Draft System Requirements Specification (SRS) with stakeholder concurrence, initial concept of operations (CONOPS), preliminary safety assessment, initial risk register, MOSA/ICD outline, and Program Master Schedule.",
+        "exit_criteria": "Functional Baseline approved and baselined, SRR minutes and action items closed or captured in open-item list, MOSA/interface requirements approved for allocation, and formal update to program risk register reflecting SRR outcomes.",
+        "artifacts": [
+          "System Requirements Specification (SRS)",
+          "Functional Baseline Description",
+          "Concept of Operations (CONOPS)",
+          "Initial System Hazard Analysis (SHA)",
+          "MOSA Requirements and ICD outline",
+          "SRR report and action item list"
+        ]
+      },
+      {
+        "name": "System Functional Review (SFR)",
+        "purpose": "Validate system functional decomposition and functional architectures, review allocation strategy for software- and hardware-implemented functions, and confirm requirements traceability to functional elements.",
+        "entry_criteria": "Functional Baseline in place, preliminary functional decomposition models, initial allocations to major modules, and updated risk register addressing functional risks.",
+        "exit_criteria": "Functional decomposition approved, functional-to-logical mapping completed for major modules, updated Allocated Requirements List (pre-allocated), and closure or plan to mitigate functional shortfalls.",
+        "artifacts": [
+          "Functional Decomposition Models",
+          "Updated SRS with functional trace mappings",
+          "Preliminary Interface Control Diagrams",
+          "Updated risk register specific to functional allocation",
+          "SFR minutes and decisions"
+        ]
+      },
+      {
+        "name": "Preliminary Design Review (PDR)",
+        "purpose": "Demonstrate that the Allocated Baseline satisfies the Functional Baseline and that the proposed design approach meets requirements with acceptable risk for continued development; establish the Allocated Baseline.",
+        "entry_criteria": "Allocated Baseline draft, preliminary designs for airframe and avionics, supplier integration plans for COTS payloads, preliminary test and V&V plans, and safety and cyber plans.",
+        "exit_criteria": "Allocated Baseline formally approved; documented design trades and rationale; supplier integration plans approved; test plan sufficient to proceed to detailed design; risk posture updated with plans for TRL maturation of ISR sensor and comms processor.",
+        "artifacts": [
+          "Allocated Baseline documentation",
+          "Preliminary Design Package for major modules",
+          "Interface Control Documents (ICDs) for modular payload interfaces",
+          "Preliminary Test and V&V Plan",
+          "Safety and RMF/Cyber initial plans",
+          "PDR report and action items"
+        ]
+      },
+      {
+        "name": "Critical Design Review (CDR)",
+        "purpose": "Verify that the detailed design meets the Allocated Baseline and is ready for full-scale fabrication, assembly, integration, and test; establish the Product Baseline.",
+        "entry_criteria": "Complete detailed designs for airframe, propulsion, FCS, and payload interfaces, supplier hardware/software contracts in place, manufacturing readiness assessment, completed safety analyses for lethal payload integration, and updated V&V plans.",
+        "exit_criteria": "Product Baseline approved and baselined; manufacturing and test readiness demonstrated to proceed to production/assembly; critical supplier readiness and production contracts in place; updated risk register with high-risk items parked with mitigation schedules.",
+        "artifacts": [
+          "Product Baseline (detailed drawings, software builds)",
+          "Manufacturing and Production Readiness Reports",
+          "Finalized ICDs and mechanical/electrical interface drawings",
+          "Updated Safety Assessment and RMF artifacts",
+          "CDR report and disposition of CDR action items"
+        ]
+      },
+      {
+        "name": "Test Readiness Review (TRR)",
+        "purpose": "Confirm readiness to begin integrated system testing and flight test campaigns including safety, instrumentation, test procedures, and data collection required for acceptance and RMF evidence.",
+        "entry_criteria": "Completed integration of flight articles and payloads in test configuration, test procedures and data collection plans approved, flight safety waivers and airspace approvals in process, and test instrumentation verified.",
+        "exit_criteria": "Authorization to execute planned ground and flight test events, test safety waivers in place or approved contingency plans, test data management and analysis paths verified, and TRR report with any residual test risks and mitigations.",
+        "artifacts": [
+          "Integrated Test Procedures and Data Requirements",
+          "Flight Test Plans and Safety Case",
+          "Instrumentation and Telemetry Plans",
+          "Test Readiness Certification and TRR minutes"
+        ]
+      }
+    ],
+    "requirements_traceability": {
+      "approach": "Requirements are managed with a model-based approach that ties stakeholder-derived operational needs to system-level requirements and down to module and software requirements. All requirements will be captured, versioned, and traced via a formal requirements repository and maintained through the review cycle. Traceability includes derivation links, verification method links, allocation to modules, and risk/mitigation associations. Requirement changes are subject to baseline and change-board approval following CM rules.",
+      "tools": "DOORS (requirements repository and baselining), Jira (requirements/sprint/work management for software), GitLab (source control and CI/CD), MBSE models in Cameo or equivalent for architecture traceability, and a centralized document repository (S3/MilCloud) for artifacts.",
+      "digital_thread_notes": "The digital thread will link requirements (DOORS) to architecture models (MBSE), software artifacts (GitLab commits), verification results (test reports), and configuration baselines. Automated linking between DOORS and Jira/GitLab will enable near-real-time traceability for software changes, enabling rapid impact assessments for the compressed schedule and facilitating MOSA payload integration by mapping ICDs to interface test vectors."
+    },
+    "architecture_mosa": {
+      "mosa_approach": "This program implements MOSA to enable third-party payload integration with a fixed platform host. The approach mandates open, well-documented interfaces (mechanical, power, data, and command/control) and enforces OCI principles to decouple payload development and sustainment from the platform. FACE and OCI guidelines will be required for software and runtime interfaces to enable plug-and-play payloads and reduce integration testing for each new vendor payload.",
+      "modules_summary": "Defined modules are: airframe, propulsion unit, battery, flight control computer (FCS), lethal payload, communications payload, and ISR sensor payload. Decomposition rationale: separate mission modules (payloads) from platform modules (airframe, propulsion, battery, FCS) to support attritable sustainment, rapid payload swaps, and independent supplier development. FCS and avionics are designed to host payloads via standardized compute and communications buses.",
+      "interfaces_summary": "Key interfaces are physical mounting and mechanical latches, power distribution and conditioning (standardized voltage/tap points), command/data interfaces (FACE-conformant APIs over Ethernet/UDP with optional DDS for publish/subscribe), avionics bus (CAN or ARINC-lite equivalent for control signals), secure boot and authentication handshake for payload software, and safety interlocks for lethal payload arming. ICDs will specify mechanical, electrical, pinouts, data schemas, and security profiles.",
+      "standards_summary": "Applicable open standards include FACE Technical Standard for software runtime and transport services, Open Container Initiative (OCI) for payload software packaging and execution, MOD Payload guidance where applicable for physical and functional payload definitions, IEEE 802.3 (Ethernet), DDS/ROS2 (as selected), and MIL-STD-882E for system safety processes. Mapping: FACE applies to flight control and payload software interfaces; OCI to payload software packaging and deployment; MOD Payload to mechanical/electrical mounting and fit/form."
+    },
+    "risk_register": [
+      {
+        "risk": "Low TRL ISR Sensor",
+        "cause": "Selected ISR sensor technology is at low TRL and has not been flight-qualified on this platform form-factor.",
+        "likelihood": "High",
+        "impact": "High",
+        "mitigation": "Parallel supplier assessments including heritage sensor options; fund a two-stage maturation plan with HIL and flight demo on surrogate platform within first 6 months; schedule insertion of proven COTS ISR sensor if TRL milestones are not met.",
+        "owner": "Payload Integration Lead"
+      },
+      {
+        "risk": "Low TRL Communications Processor",
+        "cause": "Communications processor intended for contested environment operations is immature and requires custom firmware and RMF evidence.",
+        "likelihood": "High",
+        "impact": "High",
+        "mitigation": "Engage communications vendor early to obtain development roadmap, define incremental test points and RMF artifact deliverables, and maintain a fallback certified communications module for initial production; prioritize cyber testbeds and developer sandboxes for rapid integration testing.",
+        "owner": "Avionics/Comms Lead"
+      },
+      {
+        "risk": "Aggressive Schedule (18-month-to-production)",
+        "cause": "Compressed development timeline increases risk of design immaturity, supplier delays, and insufficient V&V.",
+        "likelihood": "High",
+        "impact": "High",
+        "mitigation": "Adopt incremental delivery with minimal viable product first production split, aggressive use of heritage components (Raven/Puma analogs), concurrent design and supplier qualification streams, weekly SE integration checkpoints, and prioritized critical-path risk retirements.",
+        "owner": "Program Manager"
+      },
+      {
+        "risk": "Safety Hazard from Lethal Payload Integration",
+        "cause": "Integration of lethal payload introduces safety-critical arming/arming interlock risks and potential inadvertent release scenarios.",
+        "likelihood": "Medium",
+        "impact": "High",
+        "mitigation": "Perform early and continuous System Hazard Analysis (per MIL-STD-882E), implement redundant mechanical and software interlocks, define explicit authorization and arming modes, conduct rigorous ground safety testing and certification with Service Safety Authority prior to any flight with live ordnance.",
+        "owner": "System Safety Engineer"
+      },
+      {
+        "risk": "Cybersecurity / RMF Nonconformance",
+        "cause": "Software-intensive architecture and contested communications mission expose the system to cyber vulnerabilities and RMF evidence gaps.",
+        "likelihood": "Medium",
+        "impact": "High",
+        "mitigation": "Execute RMF steps in parallel with development, define security SRR/SFR artifacts early, employ enclave separation, hardware root-of-trust, encryption, continuous vulnerability scanning, and ensure all suppliers deliver demonstrable security artifacts for C&A.",
+        "owner": "Cybersecurity Lead"
+      },
+      {
+        "risk": "Sensor Obsolescence in Sustainment Tail",
+        "cause": "ISR sensor is identified as an obsolescence candidate with short industry life cycle.",
+        "likelihood": "Medium",
+        "impact": "Medium",
+        "mitigation": "Enforce MOSA-compliant interfaces to ease future sensor swaps, maintain qualified list of alternate sensors, and acquire sufficient technical data rights or Government Purpose Rights for sensor integration data where feasible.",
+        "owner": "Sustainment Lead"
+      }
+    ],
+    "config_mgmt": {
+      "approach": "Configuration management follows a disciplined, scaled CM process tuned to the rapid acquisition tempo. A program CM board (CMB) chaired by the Program Manager with members from Systems Engineering, Contracts, Safety, Cyber, and Logistics will adjudicate baseline changes. All configuration items (hardware drawings, software builds, ICDs, and requirements baselines) will be tracked in the CM toolchain (DOORS for baselined requirements, GitLab for software builds, and a controlled document repository). Baseline releases coincide with technical reviews and production gates.",
+      "baselines": [
+        "Functional Baseline (FBL) at SRR",
+        "Allocated Baseline (ABL) at PDR",
+        "Product Baseline (PBL) at CDR",
+        "Software Baseline (continuous CI/CD snapshots tied to releases)",
+        "Test Baseline (for TRR and production acceptance)"
+      ],
+      "change_control": "Engineering Change Proposals (ECPs) are submitted to the CMB with documented justification, impact analysis (cost, schedule, safety, cyber), and proposed disposition. Emergency changes during flight test require expedited board action with delegated authority defined in the CM Plan. Change control integrates with contract modifications and supplier change notices; software changes follow a lightweight agile ECP process tied to Jira issues and formal release notes for baselined releases."
+    },
+    "vnv": {
+      "strategy": "Verification and validation (V&V) emphasizes early and frequent demonstration of mission-essential capabilities using a 'test-as-you-build' model to support the aggressive schedule. VM activities will proceed in parallel to development: unit and module-level verification for hardware and software, integration and HIL testing for avionics and payload interfaces, incremental ground tests including EMI/EMC and vibration, and staged flight test campaigns beginning with safe-flight demonstrations on surrogate hardware and progressing to fully integrated mission flights. RMF and safety evidence are gathered throughout V&V and used as criteria for gating flight tests and production acceptance.\n\nValidation centers on operationally representative scenarios for ISR, lethal payload employment (inert rounds for validation), and communications node operation in contested emulation environments. Test data will be used to update performance models, reliability growth curves, and to refine requirements and maintenance procedures prior to production.",
+      "test_levels": [
+        "Unit and Component Testing",
+        "Software-in-the-Loop (SIL) and Hardware-in-the-Loop (HIL)",
+        "Subsystem Integration Testing",
+        "Ground Safety and Environmental Testing (vibration, EMI/EMC, thermal)",
+        "Flight Test (incremental: captive carry, initial flights, mission flights)",
+        "System Acceptance and Production Acceptance Testing"
+      ],
+      "acceptance_criteria": "Acceptance will require demonstration of core performance metrics in representative operational scenarios: specified ISR sensor resolution and range, communications throughput and latency under contested simulation profiles, verified safe and secure lethal payload arming procedures, minimum mission endurance (flight time) and effective range, MTBF meeting contract reliability targets, and completion of required RMF ATO/authorization artifacts or interim interim authority to test. All high-severity hazards must be mitigated to acceptable risk and documented in the Safety Case."
+    },
+    "data_mgmt": {
+      "data_items": [
+        "DI-SESS-81785 Systems Engineering Plan (SEP)",
+        "CDRL: System Requirements Specification (SRS)",
+        "CDRL: Interface Control Documents (ICDs)",
+        "CDRL: Test and Evaluation Master Plan (TEMP)",
+        "CDRL: System Safety Assessment (per MIL-STD-882E)",
+        "CDRL: Cybersecurity and RMF Artifacts (e.g., SSP, SAR)",
+        "CDRL: Software Build and Source Code Deliverables",
+        "CDRL: Maintenance and Logistics Data Package"
+      ],
+      "data_rights_strategy": "The program will seek Government Purpose Rights (GPR) for integration-critical technical data and software interfaces to support sustainment and MOSA payload integration. For COTS lethal payloads and some sensors, the program will negotiate sufficient rights to perform field-level repairs and future integrations; where unlimited rights are unobtainable, the program will require well-documented ICDs and integration support clauses in contracts. Open packaging standards (OCI) and modular interfaces reduce reliance on vendor proprietary internals, enabling better long-term supportability.",
+      "repo_notes": "Primary repositories: DOORS for requirements baselining, GitLab for source code and CI/CD pipelines, Jira for software/task tracking, and a secured S3/MilCloud bucket for CDRLs and test data. MBSE artifacts and models maintained in a central model server (Cameo or equivalent) with automated export of key traceability matrices. Access control and role-based permissions will be enforced consistent with RMF categorizations."
+    },
+    "specialty_eng": {
+      "cyber": "Cybersecurity will follow DoD RMF (DoDI 8510.01) from project initiation. The program will define an initial Security Categorization (AATO path) for the system supporting classification of data and enclave design. Required artifacts (SSP, SCA, SAR, POA&M) will be generated incrementally. For the communications-node mission, encrypted communication waveforms, authentication, anti-tamper protections, and separation of mission and support domains will be mandatory. Continuous scanning, SBOM generation for all OCI packages, and attacker emulation during test will be used to harden software. Cybersecurity Lead owns coordination with Authorizing Official for interim test authorizations and eventual Authority to Operate (ATO).",
+      "safety": "System safety will follow MIL-STD-882E processes adapted for attritable UAS: perform Preliminary Hazard Analysis (PHA) early, System Hazard Analysis (SHA) prior to PDR, and detailed Subsystem Hazard Analyses (SSHA) before CDR. Lethal payload carriage demands explicit fail-safe mechanisms, redundant safe-arm logic, and restricted operational envelopes. Safety Case artifacts will be produced to support Test Readiness and flight approvals, and Service Safety Authority coordination will be continuous. Ground handling and ordnance safety procedures will be defined and tested before any live payload flight.",
+      "airworthiness": "Airworthiness is applicable. The program will engage the relevant Service Airworthiness Authority (SAA) and follow the Service-specific UAS airworthiness certification/clearance process beginning at SRR. Airworthiness evidence will include structural analyses, flight control integrity, system redundancy assessments, and documented flight test results. Given the attritable profile, the airworthiness strategy balances risk acceptance for expendability with minimum survivability and safety for operations in the deployed environment; formal release or waiver from the SAA will be obtained before operational fielding.",
+      "human_factors": "Human Systems Integration (HSI) focuses on forward-deployed operator ease-of-use, reduced training burden, and clear human-machine interfaces for mission-critical actions (e.g., payload selection, mission abort, lethal payload arming). HMI design will be iterated with representative operators and include ergonomics for portable launcher and ground control station (GCS). Workload, situational awareness, and maintenance task analyses will be performed; procedures and training materials will be validated in operationally realistic user trials.",
+      "reliability": "Reliability engineering acknowledges the attritable nature but still mandates mission success rates for critical warfighter tasks. Reliability requirements will be quantified (e.g., MTBF targets for airframe and avionics) and validated through accelerated life testing, environmental stress screening, and operational flight hours. Reliability growth modeling will be used during development to forecast readiness and to plan spares and logistic support. Key reliability focus areas include propulsion/battery endurance, FCS software stability, and payload interface robustness.",
+      "maintainability": "Maintainability approach emphasizes rapid field-level replacement of LRUs, plug-and-play payload swaps, minimal special support equipment, and simple diagnostics accessible via handheld devices. Mean Time To Repair (MTTR) targets will be established for common faults, and maintenance tasks will be designed for low-skilled operators in expeditionary environments. A common spare parts strategy and attritable cost model will be defined to optimize sustainment tail logistics and minimize lifecycle cost."
+    },
+    "appendices": {
+      "glossary": [
+        {
+          "term": "MOSA",
+          "definition": "Modular Open Systems Approach - an approach to system design that emphasizes modularity, open standards, and well-documented interfaces to enable competition and rapid upgrades."
+        },
+        {
+          "term": "OCI",
+          "definition": "Open Container Initiative - standards for packaging and distributing containerized software components; used here to standardize payload software packaging."
+        },
+        {
+          "term": "FACE",
+          "definition": "Future Airborne Capability Environment - a standardized architecture and technical standard for avionics software portability and interoperability."
+        },
+        {
+          "term": "TRL",
+          "definition": "Technology Readiness Level - scale to assess maturity of a technology from concept (TRL 1) to proven in operational environment (TRL 9)."
+        },
+        {
+          "term": "ECP",
+          "definition": "Engineering Change Proposal - formal request to change baselined configuration items subject to change control processes."
+        },
+        {
+          "term": "RMF",
+          "definition": "Risk Management Framework - DoD process for cybersecurity risk management and authorization of information systems."
+        }
+      ],
+      "references": [
+        "DoDI 5000.02, Operation of the Adaptive Acquisition Framework",
+        "DoD Systems Engineering (SE) Guide v4.1",
+        "DoDI 5000.88, Major Capability Acquisition",
+        "DoDI 8510.01, Risk Management Framework (RMF) for DoD IT",
+        "MIL-STD-882E, Standard Practice for System Safety",
+        "FACE Technical Standard (Edition relevant to program)",
+        "Open Container Initiative (OCI) Specifications",
+        "Service Airworthiness Authority guidance (Service-specific UAS airworthiness process)"
+      ]
+    },
+    "sources_used": [
+      {
+        "file_id": 2,
+        "filename": "description.txt",
+        "excerpt": "Program description indicates the Test Program is a Class 1 sUAS with primary ISR mission and secondary lethal payload and communications-node roles, to be deployed with forward deployed units."
+      },
+      {
+        "file_id": 4,
+        "filename": "EXAMPLE for MOSA_RFI.docx",
+        "excerpt": "MOSA RFI example emphasizes OCI and FACE for payload integration and the desire to purchase platform hardware separately from sensors and communications modules."
+      },
+      {
+        "file_id": 3,
+        "filename": "EXAEMPLAR_Acquisition Strategy .docx",
+        "excerpt": "Acquisition strategy exemplar notes the rapid timeline (under 18 months to production), attritable program flag, and sustainment tail considerations for selecting COTS payloads and modular interfaces."
+      }
+    ]
+  }
+}

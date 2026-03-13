@@ -1,0 +1,105 @@
+questions:
+  - id: a_program_description
+    prompt: "Describe the program"
+    help: "Provide a high-level description of the program, including its purpose, mission, scope, and key stakeholders."
+    type: textarea
+
+  - id: b_dev_cost_estimate
+    prompt: "What is the estimated development cost? (in $M)"
+    help: "Provide the total estimated development cost in millions of dollars (e.g., 125.5)."
+    type: number
+
+  - id: c_production_unit_cost
+    prompt: "What is the estimated production unit cost? (in $M)"
+    help: "Provide the estimated cost per production unit in millions of dollars."
+    type: number
+
+  - id: d_attritable_or_sustainment_tail
+    prompt: "Is this program attritable or does it have a sustainment tail?"
+    help: "Attritable systems are designed to be expended or lost in operation. A sustainment tail refers to ongoing logistics, maintenance, and support requirements over the program lifecycle."
+    type: select
+    options:
+      - value: attritable
+        label: Attritable
+      - value: sustainment_tail
+        label: Has Sustainment Tail
+      - value: both
+        label: Both
+      - value: neither
+        label: Neither
+
+  - id: e_similar_previous_programs
+    prompt: "Are there similar previous programs or analogous systems?"
+    help: "Identify any predecessor programs, analogous systems, or similar acquisition efforts that can inform cost, schedule, or technical baselines."
+    type: textarea
+
+  - id: f_tech_challenges_and_risk_areas
+    prompt: "What are the key technical challenges and risk areas?"
+    help: "Describe known or anticipated technical challenges, technology readiness concerns, integration risks, and areas of significant program risk."
+    type: textarea
+
+  - id: g_mosa_scenarios
+    prompt: "What are the relevant MOSA scenarios for this program?"
+    help: "Describe Modular Open Systems Approach scenarios — how modularity, open interfaces, and competitive upgrade strategies may be applied or are anticipated."
+    type: textarea
+
+  - id: h_candidate_modules
+    prompt: "What are the candidate modules?"
+    help: "Add each functional module or subsystem being considered for the program architecture. Include a description and rationale for each."
+    type: modules_builder
+
+  - id: i_known_standards_architectures_mapping
+    prompt: "What known standards and architectures apply to each module?"
+    help: "Map candidate modules to relevant open standards, reference architectures, or interface standards (e.g., FACE, VITA 65/SOSA, VICTORY, GVA, CMOSS)."
+    type: textarea
+
+  - id: j_obsolescence_candidates
+    prompt: "Are there known or anticipated obsolescence candidates?"
+    help: "Identify hardware components, software dependencies, or technologies at risk of obsolescence during the program lifecycle and any mitigation strategies."
+    type: textarea
+
+  - id: k_commercial_solutions_by_module
+    prompt: "What commercial solutions exist for each module?"
+    help: "Identify commercially available products, COTS/MOTS solutions, or open-source options applicable to each candidate module."
+    type: textarea
+
+  - id: l_software_large_part
+    prompt: "Is software a large part of this program?"
+    help: "Indicate whether software development represents a significant portion of the program's cost, schedule, or technical complexity (typically >50% of development effort)."
+    type: select
+    options:
+      - value: "yes"
+        label: "Yes"
+      - value: "no"
+        label: "No"
+      - value: unknown
+        label: Unknown
+
+  - id: m_mission_or_safety_critical
+    prompt: "Is this program mission-critical or safety-critical?"
+    help: "Mission-critical systems are essential to mission success and failure has significant operational impact. Safety-critical systems can cause injury, death, or environmental harm if they fail."
+    type: select
+    options:
+      - value: mission_critical
+        label: Mission Critical
+      - value: safety_critical
+        label: Safety Critical
+      - value: both
+        label: Both
+      - value: neither
+        label: Neither
+
+  - id: n_software_standards_architectures
+    prompt: "What software standards and architectures are applicable?"
+    help: "Identify applicable software standards, architectural frameworks, and best practices (e.g., FACE Technical Standard, POSIX, AUTOSAR, DO-178C, IEC 61508)."
+    type: textarea
+
+  - id: o_mosa_repo_searched
+    prompt: "Has the MOSA repository been searched for applicable solutions?"
+    help: "Indicate whether the DoD MOSA repository or similar government resources have been searched for existing solutions, standards, qualified products, or reusable components."
+    type: select
+    options:
+      - value: "yes"
+        label: "Yes"
+      - value: "no"
+        label: "No"
