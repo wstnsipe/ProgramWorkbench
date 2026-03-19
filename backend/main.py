@@ -46,9 +46,14 @@ def _on_startup() -> None:
     _startup_index_reference_docs()
 
 
+_cors_origins_env = os.environ.get("FRONTEND_URL", "")
+_cors_origins = [o.strip() for o in _cors_origins_env.split(",") if o.strip()] if _cors_origins_env else []
+_cors_origins += ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
+    allow_origins=_cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_methods=["*"],
     allow_headers=["*"],
 )

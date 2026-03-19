@@ -1,7 +1,11 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "postgresql://acq:acqpass@127.0.0.1:5433/acq_workbench"
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://acq:acqpass@127.0.0.1:5433/acq_workbench")
+# Railway/Heroku provide postgres:// prefix; SQLAlchemy requires postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
