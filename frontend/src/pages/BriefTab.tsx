@@ -5,6 +5,8 @@ import Toast from '../components/Toast'
 
 const API = import.meta.env.VITE_API_BASE_URL
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 interface ProgramBrief {
   program_description: string | null
   dev_cost_estimate: number | null
@@ -17,7 +19,7 @@ interface ProgramBrief {
   updated_at: string
 }
 
-type FormState = {
+type BriefForm = {
   program_description: string
   dev_cost_estimate: string
   production_unit_cost: string
@@ -28,7 +30,14 @@ type FormState = {
   safety_critical: boolean
 }
 
-const EMPTY_FORM: FormState = {
+export interface ModuleItem {
+  name: string
+  description: string
+  rationale: string
+  interfaces: string
+}
+
+const EMPTY_BRIEF: BriefForm = {
   program_description: '',
   dev_cost_estimate: '',
   production_unit_cost: '',
@@ -39,7 +48,7 @@ const EMPTY_FORM: FormState = {
   safety_critical: false,
 }
 
-function briefToForm(brief: ProgramBrief): FormState {
+function briefToForm(brief: ProgramBrief): BriefForm {
   return {
     program_description: brief.program_description ?? '',
     dev_cost_estimate: brief.dev_cost_estimate != null ? String(brief.dev_cost_estimate) : '',
@@ -52,7 +61,7 @@ function briefToForm(brief: ProgramBrief): FormState {
   }
 }
 
-const BOOL_FIELDS: { name: keyof FormState; label: string; helper: string }[] = [
+const BOOL_FIELDS: { name: keyof BriefForm; label: string; helper: string }[] = [
   {
     name: 'attritable',
     label: 'Attritable',
@@ -80,23 +89,208 @@ const BOOL_FIELDS: { name: keyof FormState; label: string; helper: string }[] = 
   },
 ]
 
+// ── ModulesBuilder ────────────────────────────────────────────────────────────
+
+const emptyDraft = (): ModuleItem => ({ name: '', description: '', rationale: '', interfaces: '' })
+
+interface ModulesBuilderProps {
+  modules: ModuleItem[]
+  onChange: (modules: ModuleItem[]) => void
+}
+
+function ModulesBuilder({ modules, onChange }: ModulesBuilderProps) {
+  const [draft, setDraft] = useState<ModuleItem>(emptyDraft())
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [nameError, setNameError] = useState(false)
+
+  function setField(field: keyof ModuleItem, value: string) {
+    setDraft(prev => ({ ...prev, [field]: value }))
+    if (field === 'name' && value.trim()) setNameError(false)
+  }
+
+  function commitDraft() {
+    if (!draft.name.trim()) { setNameError(true); return }
+    if (editingIndex !== null) {
+      onChange(modules.map((m, i) => i === editingIndex ? { ...draft } : m))
+      setEditingIndex(null)
+    } else {
+      onChange([...modules, { ...draft }])
+    }
+    setDraft(emptyDraft())
+    setNameError(false)
+  }
+
+  function startEdit(i: number) {
+    setDraft({ ...modules[i] })
+    setEditingIndex(i)
+    setNameError(false)
+  }
+
+  function cancelEdit() {
+    setDraft(emptyDraft())
+    setEditingIndex(null)
+    setNameError(false)
+  }
+
+  function deleteModule(i: number) {
+    onChange(modules.filter((_, idx) => idx !== i))
+    if (editingIndex === i) { setEditingIndex(null); setDraft(emptyDraft()) }
+  }
+
+  const isEditing = editingIndex !== null
+
+  return (
+    <div className="mb-form">
+      <div className="mb-form-fields">
+        <div className="mb-field">
+          <label className="mb-label">
+            Module Name <span className="mb-required">*</span>
+          </label>
+          <input
+            className={`mb-input${nameError ? ' mb-input-error' : ''}`}
+            value={draft.name}
+            onChange={e => setField('name', e.target.value)}
+            placeholder="e.g. Core Software, Navigation System…"
+          />
+          {nameError && <span className="mb-error-msg">Name is required</span>}
+        </div>
+
+        <div className="mb-field">
+          <label className="mb-label">Description</label>
+          <textarea
+            className="mb-textarea"
+            value={draft.description}
+            onChange={e => setField('description', e.target.value)}
+            rows={2}
+            placeholder="Brief description of what this module does…"
+          />
+        </div>
+
+        <div className="mb-field">
+          <label className="mb-label">Rationale / Why a module?</label>
+          <textarea
+            className="mb-textarea"
+            value={draft.rationale}
+            onChange={e => setField('rationale', e.target.value)}
+            rows={2}
+            placeholder="Why should this be a distinct module?"
+          />
+        </div>
+
+        <div className="mb-field">
+          <label className="mb-label">Likely Interfaces</label>
+          <input
+            className="mb-input"
+            value={draft.interfaces}
+            onChange={e => setField('interfaces', e.target.value)}
+            placeholder="e.g. FACE, SOSA, MIL-STD-1553…"
+          />
+        </div>
+
+        <div className="mb-form-actions">
+          <button className="mb-add-btn" onClick={commitDraft}>
+            {isEditing ? 'Update module' : '+ Add module'}
+          </button>
+          {isEditing && (
+            <button className="mb-cancel-btn" onClick={cancelEdit}>
+              Cancel
+            </button>
+          )}
+        </div>
+      </div>
+
+      {modules.length > 0 && (
+        <div className="mb-list">
+          <div className="mb-list-header">Added modules ({modules.length})</div>
+          {modules.map((mod, i) => (
+            <div
+              key={i}
+              className={`mb-module-row${editingIndex === i ? ' mb-module-row-editing' : ''}`}
+            >
+              <div className="mb-module-info">
+                <span className="mb-module-name">{mod.name}</span>
+                {mod.description && (
+                  <span className="mb-module-detail">{mod.description}</span>
+                )}
+                {mod.rationale && (
+                  <span className="mb-module-detail mb-module-rationale">↳ {mod.rationale}</span>
+                )}
+                {mod.interfaces && (
+                  <span className="mb-module-detail mb-module-interfaces">⇄ {mod.interfaces}</span>
+                )}
+              </div>
+              <div className="mb-module-actions">
+                <button
+                  className="mb-row-btn"
+                  onClick={() => startEdit(i)}
+                  disabled={isEditing && editingIndex !== i}
+                >
+                  Edit
+                </button>
+                <button
+                  className="mb-row-btn mb-row-btn-danger"
+                  onClick={() => deleteModule(i)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {modules.length === 0 && (
+        <div className="mb-empty">No modules added yet. Fill in the form above and click Add module.</div>
+      )}
+    </div>
+  )
+}
+
+// ── Main BriefTab ─────────────────────────────────────────────────────────────
+
 export default function BriefTab({ programId }: { programId: string }) {
-  const [form, setForm] = useState<FormState>(EMPTY_FORM)
+  const [form, setForm] = useState<BriefForm>(EMPTY_BRIEF)
+  const [wizardAnswers, setWizardAnswers] = useState<Record<string, string>>({})
+  const [modules, setModules] = useState<ModuleItem[]>([])
+  const [mosarepoSearched, setMosarepoSearched] = useState('')
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ kind: 'success' | 'error'; message: string } | null>(null)
 
   useEffect(() => {
-    async function fetchBrief() {
-      const res = await fetch(`${API}/programs/${programId}/brief`)
-      if (res.status === 404) return
-      if (res.ok) {
-        const brief: ProgramBrief = await res.json()
+    async function fetchAll() {
+      const [briefRes, wizardRes] = await Promise.all([
+        fetch(`${API}/programs/${programId}/brief`),
+        fetch(`${API}/programs/${programId}/wizard`),
+      ])
+
+      if (briefRes.ok) {
+        const brief: ProgramBrief = await briefRes.json()
         setForm(briefToForm(brief))
         setUpdatedAt(brief.updated_at)
       }
+
+      if (wizardRes.ok) {
+        const wizard = await wizardRes.json()
+        const answers: Record<string, string> = {}
+        for (const [k, v] of Object.entries(wizard.answers as Record<string, unknown>)) {
+          if (k !== 'modules' && typeof v === 'string') answers[k] = v
+        }
+        setWizardAnswers(answers)
+        setMosarepoSearched((wizard.answers as Record<string, unknown>)['o_mosa_repo_searched'] as string ?? '')
+
+        const mods = (wizard.answers as Record<string, unknown>)['modules']
+        if (Array.isArray(mods)) {
+          setModules(mods.map((m: Record<string, string>) => ({
+            name: m.name || '',
+            description: m.description || '',
+            rationale: m.rationale || '',
+            interfaces: m.interfaces || '',
+          })))
+        }
+      }
     }
-    fetchBrief()
+    fetchAll()
   }, [programId])
 
   function handleText(e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) {
@@ -107,11 +301,15 @@ export default function BriefTab({ programId }: { programId: string }) {
     setForm(f => ({ ...f, [e.target.name]: e.target.checked }))
   }
 
+  function handleWizardText(id: string, value: string) {
+    setWizardAnswers(prev => ({ ...prev, [id]: value }))
+  }
+
   async function handleSave() {
     setSaving(true)
     setToast(null)
     try {
-      const payload = {
+      const briefPayload = {
         program_description: form.program_description || null,
         dev_cost_estimate: form.dev_cost_estimate !== '' ? parseFloat(form.dev_cost_estimate) : null,
         production_unit_cost: form.production_unit_cost !== '' ? parseFloat(form.production_unit_cost) : null,
@@ -121,19 +319,39 @@ export default function BriefTab({ programId }: { programId: string }) {
         mission_critical: form.mission_critical,
         safety_critical: form.safety_critical,
       }
-      const res = await fetch(`${API}/programs/${programId}/brief`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
+
+      const wizardPayload: Record<string, unknown> = {
+        // Mirror brief fields into wizard answers for document generation
+        a_program_description: form.program_description || '',
+        b_dev_cost_estimate: form.dev_cost_estimate || '',
+        c_production_unit_cost: form.production_unit_cost || '',
+        ...wizardAnswers,
+        o_mosa_repo_searched: mosarepoSearched,
+      }
+      if (modules.length > 0) wizardPayload['modules'] = modules
+
+      const [briefRes] = await Promise.all([
+        fetch(`${API}/programs/${programId}/brief`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(briefPayload),
+        }),
+        fetch(`${API}/programs/${programId}/wizard`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ answers: wizardPayload }),
+        }),
+      ])
+
+      if (!briefRes.ok) {
+        const body = await briefRes.json().catch(() => ({}))
         setToast({ kind: 'error', message: body.detail ?? 'Save failed' })
         return
       }
-      const brief: ProgramBrief = await res.json()
+
+      const brief: ProgramBrief = await briefRes.json()
       setUpdatedAt(brief.updated_at)
-      setToast({ kind: 'success', message: 'Brief saved' })
+      setToast({ kind: 'success', message: 'Saved' })
     } catch {
       setToast({ kind: 'error', message: 'Network error' })
     } finally {
@@ -205,6 +423,143 @@ export default function BriefTab({ programId }: { programId: string }) {
         </div>
       </div>
 
+      {/* Similar Previous Programs */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">Similar Previous Programs or Analogous Systems</h3>
+          <p className="form-card__desc">Identify any predecessor programs, analogous systems, or similar acquisition efforts that can inform cost, schedule, or technical baselines.</p>
+        </div>
+        <div className="form-card__body">
+          <div className="form-field">
+            <textarea
+              rows={4}
+              value={wizardAnswers['e_similar_previous_programs'] ?? ''}
+              onChange={e => handleWizardText('e_similar_previous_programs', e.target.value)}
+              placeholder="Describe analogous programs or systems…"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Technical Challenges */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">Key Technical Challenges and Risk Areas</h3>
+          <p className="form-card__desc">Describe known or anticipated technical challenges, technology readiness concerns, integration risks, and areas of significant program risk.</p>
+        </div>
+        <div className="form-card__body">
+          <div className="form-field">
+            <textarea
+              rows={4}
+              value={wizardAnswers['f_tech_challenges_and_risk_areas'] ?? ''}
+              onChange={e => handleWizardText('f_tech_challenges_and_risk_areas', e.target.value)}
+              placeholder="Describe technical challenges and risk areas…"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* MOSA Scenarios */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">Relevant MOSA Scenarios</h3>
+          <p className="form-card__desc">Describe Modular Open Systems Approach scenarios — how modularity, open interfaces, and competitive upgrade strategies may be applied or are anticipated.</p>
+        </div>
+        <div className="form-card__body">
+          <div className="form-field">
+            <textarea
+              rows={4}
+              value={wizardAnswers['g_mosa_scenarios'] ?? ''}
+              onChange={e => handleWizardText('g_mosa_scenarios', e.target.value)}
+              placeholder="Describe relevant MOSA scenarios…"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Candidate Modules */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">Candidate Modules</h3>
+          <p className="form-card__desc">Add each functional module or subsystem being considered for the program architecture. Include a description and rationale for each.</p>
+        </div>
+        <div className="form-card__body">
+          <ModulesBuilder modules={modules} onChange={setModules} />
+        </div>
+      </div>
+
+      {/* Standards & Architectures by Module */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">Known Standards and Architectures (by Module)</h3>
+          <p className="form-card__desc">Map candidate modules to relevant open standards, reference architectures, or interface standards (e.g., FACE, VITA 65/SOSA, VICTORY, GVA, CMOSS).</p>
+        </div>
+        <div className="form-card__body">
+          <div className="form-field">
+            <textarea
+              rows={4}
+              value={wizardAnswers['i_known_standards_architectures_mapping'] ?? ''}
+              onChange={e => handleWizardText('i_known_standards_architectures_mapping', e.target.value)}
+              placeholder="Map modules to applicable standards and architectures…"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Obsolescence Candidates */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">Known or Anticipated Obsolescence Candidates</h3>
+          <p className="form-card__desc">Identify hardware components, software dependencies, or technologies at risk of obsolescence during the program lifecycle and any mitigation strategies.</p>
+        </div>
+        <div className="form-card__body">
+          <div className="form-field">
+            <textarea
+              rows={4}
+              value={wizardAnswers['j_obsolescence_candidates'] ?? ''}
+              onChange={e => handleWizardText('j_obsolescence_candidates', e.target.value)}
+              placeholder="Describe obsolescence risks and mitigations…"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Commercial Solutions */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">Commercial Solutions by Module</h3>
+          <p className="form-card__desc">Identify commercially available products, COTS/MOTS solutions, or open-source options applicable to each candidate module.</p>
+        </div>
+        <div className="form-card__body">
+          <div className="form-field">
+            <textarea
+              rows={4}
+              value={wizardAnswers['k_commercial_solutions_by_module'] ?? ''}
+              onChange={e => handleWizardText('k_commercial_solutions_by_module', e.target.value)}
+              placeholder="Describe commercial solutions available for each module…"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Software Standards & Architectures */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">Software Standards and Architectures</h3>
+          <p className="form-card__desc">Identify applicable software standards, architectural frameworks, and best practices (e.g., FACE Technical Standard, POSIX, AUTOSAR, DO-178C, IEC 61508).</p>
+        </div>
+        <div className="form-card__body">
+          <div className="form-field">
+            <textarea
+              rows={4}
+              value={wizardAnswers['n_software_standards_architectures'] ?? ''}
+              onChange={e => handleWizardText('n_software_standards_architectures', e.target.value)}
+              placeholder="Describe applicable software standards and architectures…"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Program Attributes */}
       <div className="form-card">
         <div className="form-card__header">
@@ -231,10 +586,40 @@ export default function BriefTab({ programId }: { programId: string }) {
         </div>
       </div>
 
+      {/* MOSA Repository */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">MOSA Repository Search</h3>
+          <p className="form-card__desc">Indicate whether the DoD MOSA repository or similar government resources have been searched for existing solutions, standards, qualified products, or reusable components.</p>
+        </div>
+        <div className="form-card__body">
+          <div className="wizard-options">
+            {[
+              { value: 'yes', label: 'Yes' },
+              { value: 'no', label: 'No' },
+            ].map(opt => (
+              <label
+                key={opt.value}
+                className={`wizard-option${mosarepoSearched === opt.value ? ' selected' : ''}`}
+              >
+                <input
+                  type="radio"
+                  name="o_mosa_repo_searched"
+                  value={opt.value}
+                  checked={mosarepoSearched === opt.value}
+                  onChange={() => setMosarepoSearched(opt.value)}
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Save row */}
       <div className="form-actions">
         <Button onClick={handleSave} loading={saving}>
-          {saving ? 'Saving…' : 'Save Brief'}
+          {saving ? 'Saving…' : 'Save'}
         </Button>
         {updatedAt && (
           <span className="save-status">

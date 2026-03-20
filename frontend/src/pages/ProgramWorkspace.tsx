@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import '../App.css'
 import UploadTab from './UploadTab'
 import BriefTab from './BriefTab'
-import WizardTab from './WizardTab'
 import ModulesTab from './ModulesTab'
 import DocumentsTab from './DocumentsTab'
 import ExemplarsTab from './ExemplarsTab'
@@ -16,7 +15,7 @@ interface Program {
   name: string
 }
 
-const TABS = ['Upload', 'Brief', 'Wizard', 'Modules', 'Documents', 'Exemplars', 'Knowledge'] as const
+const TABS = ['Upload', 'Brief', 'Modules', 'Documents', 'Exemplars', 'Knowledge'] as const
 type Tab = typeof TABS[number]
 
 export default function ProgramWorkspace() {
@@ -90,7 +89,6 @@ export default function ProgramWorkspace() {
         <div className="ws-content">
           {activeTab === 'Upload'    && <UploadTab    programId={id!} />}
           {activeTab === 'Brief'     && <BriefTab     programId={id!} />}
-          {activeTab === 'Wizard'    && <WizardTab    programId={id!} />}
           {activeTab === 'Modules'   && <ModulesTab   programId={id!} />}
           {activeTab === 'Documents' && <DocumentsTab programId={id!} />}
           {activeTab === 'Exemplars' && <ExemplarsTab programId={id!} />}
