@@ -1,9 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import '../App.css'
 import Button from '../components/Button'
 import Toast from '../components/Toast'
 import ModuleListEditor from '../components/brief/ModuleListEditor'
-import type { ModuleRow } from '../types'
+import ScenarioTableEditor from '../components/brief/ScenarioTableEditor'
+import ServiceBranchField from '../components/brief/ServiceBranchField'
+import { useScenarios } from '../hooks/useScenarios'
+import { useProgram } from '../hooks/useProgram'
+import { moduleScenarioWarnings } from '../utils/moduleScenarioWarnings'
+import type { ModuleRow, ServiceBranch } from '../types'
 import { EMPTY_MODULE_ROW } from '../types'
 
 const API = import.meta.env.VITE_API_BASE_URL
@@ -94,6 +99,12 @@ export default function BriefTab({ programId }: { programId: string }) {
   const [wizardAnswers, setWizardAnswers] = useState<Record<string, string>>({})
   const [modules, setModules] = useState<ModuleRow[]>(
     Array.from({ length: BASELINE_ROWS }, () => ({ ...EMPTY_MODULE_ROW }))
+  )
+  const { program, updateServiceBranch, saveStatus: branchSaveStatus } = useProgram(programId)
+  const { scenarios, updateScenario, addScenario, removeScenario, save: saveScenarios } = useScenarios(programId)
+  const moduleScenarioAlerts = useMemo(
+    () => moduleScenarioWarnings(modules, scenarios),
+    [modules, scenarios],
   )
   const [mosarepoSearched, setMosarepoSearched] = useState('')
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
@@ -209,6 +220,7 @@ export default function BriefTab({ programId }: { programId: string }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ modules }),
         }),
+        saveScenarios(),
       ])
 
       if (!briefRes.ok) {
@@ -229,6 +241,26 @@ export default function BriefTab({ programId }: { programId: string }) {
 
   return (
     <div className="brief-form">
+
+      {/* Service Branch & MIG */}
+      <div className="form-card">
+        <div className="form-card__header">
+          <h3 className="form-card__title">Service & MIG Selection</h3>
+          <p className="form-card__desc">Select the service branch. The applicable Modular Open Systems Implementation Guide (MIG) is determined automatically. Army programs must also specify a PAE.</p>
+        </div>
+        <div className="form-card__body">
+          <ServiceBranchField
+            value={program?.service_branch ?? null}
+            armyPae={program?.army_pae ?? null}
+            onChange={(branch: ServiceBranch | null, pae?: string | null) =>
+              updateServiceBranch(branch, pae)
+            }
+          />
+          {branchSaveStatus === 'saving' && <p className="save-status">Saving…</p>}
+          {branchSaveStatus === 'saved'  && <p className="save-status">Saved</p>}
+          {branchSaveStatus === 'error'  && <p className="save-status save-status--error">Save failed</p>}
+        </div>
+      </div>
 
       {/* Program Description */}
       <div className="form-card">
@@ -330,18 +362,23 @@ export default function BriefTab({ programId }: { programId: string }) {
       {/* MOSA Scenarios */}
       <div className="form-card">
         <div className="form-card__header">
-          <h3 className="form-card__title">Relevant MOSA Scenarios</h3>
-          <p className="form-card__desc">Describe Modular Open Systems Approach scenarios — how modularity, open interfaces, and competitive upgrade strategies may be applied or are anticipated.</p>
+          <h3 className="form-card__title">MOSA Scenarios</h3>
+          <p className="form-card__desc">Describe how MOSA applies to each module — reprocurement, reuse, or recompete. Each scenario is used directly in generated acquisition documents.</p>
         </div>
         <div className="form-card__body">
-          <div className="form-field">
-            <textarea
-              rows={4}
-              value={wizardAnswers['g_mosa_scenarios'] ?? ''}
-              onChange={e => handleWizardText('g_mosa_scenarios', e.target.value)}
-              placeholder="Describe relevant MOSA scenarios…"
-            />
-          </div>
+          {moduleScenarioAlerts.length > 0 && (
+            <ul className="mismatch-warnings">
+              {moduleScenarioAlerts.map(msg => (
+                <li key={msg} className="mismatch-warning">⚠ {msg}</li>
+              ))}
+            </ul>
+          )}
+          <ScenarioTableEditor
+            rows={scenarios}
+            onUpdate={updateScenario}
+            onAdd={addScenario}
+            onRemove={removeScenario}
+          />
         </div>
       </div>
 

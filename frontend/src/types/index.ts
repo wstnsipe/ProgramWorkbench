@@ -118,6 +118,12 @@ export interface ScenarioRow {
   description: string
 }
 
+export const EMPTY_SCENARIO_ROW: ScenarioRow = {
+  scenario_type: 'reprocure',
+  module_name: '',
+  description: '',
+}
+
 export const SCENARIO_LABELS: Record<ScenarioType, string> = {
   reprocure: 'Reprocure',
   reuse:     'Reuse',
