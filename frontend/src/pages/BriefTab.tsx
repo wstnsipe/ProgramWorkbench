@@ -368,7 +368,7 @@ export default function BriefTab({ programId }: { programId: string }) {
         <div className="form-card__body">
           {moduleScenarioAlerts.length > 0 && (
             <ul className="mismatch-warnings">
-              {moduleScenarioAlerts.map(msg => (
+              {moduleScenarioAlerts.map((msg: string) => (
                 <li key={msg} className="mismatch-warning">⚠ {msg}</li>
               ))}
             </ul>

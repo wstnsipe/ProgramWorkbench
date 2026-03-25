@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import * as api from '../api'
-import type { ScenarioRow, ScenarioType, SaveStatus } from '../types'
+import type { ScenarioRow, SaveStatus } from '../types'
 import { EMPTY_SCENARIO_ROW } from '../types'
 
 const MIN_ROWS = 3
