@@ -11,7 +11,7 @@ New tables:
   - sufficiency_logs
 
 New columns on existing tables (via Alembic migration):
-  - programs: service_branch, army_pae, mig_id
+  - programs: service_branch, army_pae, army_branch, mig_id
   - program_briefs: timeline_months, similar_programs_exist, software_involved
   - modules: future_recompete
   - file_chunks: is_heading, is_table, is_list, section_heading, doc_section, fact_score
@@ -100,6 +100,7 @@ MIGRATION_SQL = """
 -- programs
 ALTER TABLE programs ADD COLUMN IF NOT EXISTS service_branch VARCHAR;
 ALTER TABLE programs ADD COLUMN IF NOT EXISTS army_pae VARCHAR;
+ALTER TABLE programs ADD COLUMN IF NOT EXISTS army_branch VARCHAR;
 ALTER TABLE programs ADD COLUMN IF NOT EXISTS mig_id VARCHAR;
 
 -- program_briefs

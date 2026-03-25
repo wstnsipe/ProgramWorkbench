@@ -167,6 +167,7 @@ def compute_sufficiency(
         safety_critical=brief.get("safety_critical"),
         similar_programs_exist=brief.get("similar_programs_exist"),
         timeline_months=brief.get("timeline_months"),
+        army_branch=program.get("army_branch"),
         module_count=len(module_list),
         modules_with_cots=sum(1 for m in module_list if getattr(m, "cots_candidate", False)),
         modules_with_tech_risk=sum(1 for m in module_list if getattr(m, "tech_risk", False)),

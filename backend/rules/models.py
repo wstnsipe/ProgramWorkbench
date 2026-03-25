@@ -38,6 +38,9 @@ class RulesInput:
     # Timeline
     timeline_months: Optional[int] = None
 
+    # Army sub-branch (populated only when service_branch == "ARMY")
+    army_branch: Optional[str] = None          # FIRES | MANEUVER | AVIATION
+
     # Module stats (derived from Module table)
     module_count: int = 0
     modules_with_cots: int = 0

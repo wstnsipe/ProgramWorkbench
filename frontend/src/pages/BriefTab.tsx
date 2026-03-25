@@ -12,7 +12,7 @@ import { useStandards } from '../hooks/useStandards'
 import { usePrefill } from '../hooks/usePrefill'
 import type { PrefillSuggestion } from '../hooks/usePrefill'
 import { moduleScenarioWarnings } from '../utils/moduleScenarioWarnings'
-import type { ModuleRow, ServiceBranch } from '../types'
+import type { ModuleRow } from '../types'
 import { EMPTY_MODULE_ROW } from '../types'
 
 // ── SuggestionPill ─────────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ export default function BriefTab({ programId }: { programId: string }) {
   )
   const { program, updateServiceBranch, saveStatus: branchSaveStatus } = useProgram(programId)
   const { scenarios, updateScenario, addScenario, removeScenario, save: saveScenarios } = useScenarios(programId)
-  const { rows: standards, toggleApplies, updateNotes, addCustomStandard, removeRow: removeStandard, save: saveStandards } = useStandards(programId)
+  const { rows: standards, toggleModules, toggleInterfaces, updateNotes, addCustomStandard, removeRow: removeStandard, save: saveStandards } = useStandards(programId)
   const { fetchPrefill, getSuggestion, dismiss, loading: prefillLoading } = usePrefill(programId)
   const moduleScenarioAlerts = useMemo(
     () => moduleScenarioWarnings(modules, scenarios),
@@ -294,8 +294,9 @@ export default function BriefTab({ programId }: { programId: string }) {
           <ServiceBranchField
             value={program?.service_branch ?? null}
             armyPae={program?.army_pae ?? null}
-            onChange={(branch: ServiceBranch | null, pae?: string | null) =>
-              updateServiceBranch(branch, pae)
+            armyBranch={program?.army_branch ?? null}
+            onChange={(branch, pae, armyBranch) =>
+              updateServiceBranch(branch, pae, armyBranch)
             }
           />
           {branchSaveStatus === 'saving' && <p className="save-status">Saving…</p>}
@@ -491,7 +492,8 @@ export default function BriefTab({ programId }: { programId: string }) {
         <div className="form-card__body">
           <StandardsEditor
             rows={standards}
-            onToggle={toggleApplies}
+            onToggleModules={toggleModules}
+            onToggleInterfaces={toggleInterfaces}
             onUpdateNotes={updateNotes}
             onAddCustom={addCustomStandard}
             onRemove={removeStandard}

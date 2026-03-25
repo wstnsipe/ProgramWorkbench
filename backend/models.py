@@ -9,6 +9,10 @@ class Program(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, index=True)
+    service_branch = Column(String, nullable=True)
+    army_pae = Column(String, nullable=True)
+    army_branch = Column(String, nullable=True)
+    mig_id = Column(String, nullable=True)
 
 
 class ProgramBrief(Base):

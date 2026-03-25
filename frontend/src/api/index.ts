@@ -32,7 +32,7 @@ export const createProgram = (payload: ProgramCreatePayload): Promise<Program> =
 
 export const updateProgram = (
   id: number | string,
-  payload: Partial<Pick<Program, 'name' | 'service_branch' | 'army_pae'>>,
+  payload: Partial<Pick<Program, 'name' | 'service_branch' | 'army_pae' | 'army_branch'>>,
 ): Promise<Program> =>
   apiPatch(`/programs/${id}`, payload)
 

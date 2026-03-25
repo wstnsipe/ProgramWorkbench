@@ -29,6 +29,12 @@ class ServiceBranch(str, Enum):
     ARMY = "ARMY"
 
 
+class ArmyBranch(str, Enum):
+    FIRES    = "FIRES"
+    MANEUVER = "MANEUVER"
+    AVIATION = "AVIATION"
+
+
 class DocType(str, Enum):
     RFI          = "rfi"
     ACQ_STRATEGY = "acq_strategy"
@@ -70,6 +76,7 @@ class ProgramIn(BaseModel):
     name: str
     service_branch: Optional[ServiceBranch] = None
     army_pae: Optional[str] = None
+    army_branch: Optional[ArmyBranch] = None
 
 
 class ProgramPatch(BaseModel):
@@ -77,6 +84,7 @@ class ProgramPatch(BaseModel):
     name: Optional[str] = None
     service_branch: Optional[ServiceBranch] = None
     army_pae: Optional[str] = None
+    army_branch: Optional[ArmyBranch] = None
 
 
 class ProgramOut(BaseModel):
@@ -85,6 +93,7 @@ class ProgramOut(BaseModel):
     name: str
     service_branch: Optional[str] = None
     army_pae: Optional[str] = None
+    army_branch: Optional[str] = None
     mig_id: Optional[str] = None
 
     model_config = {"from_attributes": True}
@@ -182,7 +191,8 @@ class ScenariosBulkIn(BaseModel):
 class StandardIn(BaseModel):
     """Single standard (used inside StandardsBulkIn)"""
     standard_name: str
-    applies: bool = True
+    applies_to_modules: bool = False
+    applies_to_interfaces: bool = False
     catalog_id: Optional[str] = None
     notes: Optional[str] = None
 
@@ -191,6 +201,8 @@ class StandardOut(StandardIn):
     """GET /programs/{id}/standards list item"""
     id: int
     program_id: int
+    # applies is kept for backward compatibility; derived as applies_to_modules | applies_to_interfaces
+    applies: bool = False
     created_at: datetime
 
     model_config = {"from_attributes": True}

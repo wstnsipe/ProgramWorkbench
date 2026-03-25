@@ -51,7 +51,9 @@ def replace_standards(
         row = M(
             program_id=program_id,
             standard_name=s.standard_name,
-            applies=s.applies,
+            applies_to_modules=s.applies_to_modules,
+            applies_to_interfaces=s.applies_to_interfaces,
+            applies=s.applies_to_modules or s.applies_to_interfaces,
             catalog_id=s.catalog_id,
             notes=s.notes,
         )

@@ -4,6 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type ServiceBranch = 'USN' | 'USAF' | 'USSF' | 'ARMY'
+export type ArmyBranch = 'FIRES' | 'MANEUVER' | 'AVIATION'
 export type DocType = 'rfi' | 'acq_strategy' | 'sep' | 'mcp'
 export type ScenarioType = 'reprocure' | 'reuse' | 'recompete'
 export type SufficiencyLevel = 'GREEN' | 'YELLOW_HIGH' | 'YELLOW_LOW' | 'RED'
@@ -15,6 +16,7 @@ export interface Program {
   name: string
   service_branch: ServiceBranch | null
   army_pae: string | null
+  army_branch: ArmyBranch | null
   mig_id: string | null
 }
 
@@ -22,6 +24,7 @@ export interface ProgramCreatePayload {
   name: string
   service_branch?: ServiceBranch
   army_pae?: string
+  army_branch?: ArmyBranch
 }
 
 // ── Program Brief ─────────────────────────────────────────────────────────────
@@ -142,7 +145,9 @@ export interface ProgramStandard {
   id: number
   program_id: number
   standard_name: string
-  applies: boolean
+  applies: boolean              // derived: applies_to_modules | applies_to_interfaces
+  applies_to_modules: boolean
+  applies_to_interfaces: boolean
   catalog_id: string | null
   notes: string | null
   created_at: string
@@ -150,12 +155,23 @@ export interface ProgramStandard {
 
 export interface StandardRow {
   standard_name: string
-  applies: boolean
+  applies_to_modules: boolean
+  applies_to_interfaces: boolean
   catalog_id: string | null
   notes: string
 }
 
-/** Catalog of known standards for the dropdown */
+/** The 4 pre-seeded rows shown when no data exists yet. */
+export const DEFAULT_STANDARDS_COUNT = 4
+
+export const DEFAULT_STANDARD_ROWS: StandardRow[] = [
+  { standard_name: 'FACE Technical Standard',   applies_to_modules: false, applies_to_interfaces: false, catalog_id: 'FACE',        notes: '' },
+  { standard_name: 'VITA 65 (SOSA)',             applies_to_modules: false, applies_to_interfaces: false, catalog_id: 'SOSA',        notes: '' },
+  { standard_name: 'MIL-STD-461',                applies_to_modules: false, applies_to_interfaces: false, catalog_id: 'MIL_STD_461', notes: '' },
+  { standard_name: 'POSIX (IEEE 1003)',           applies_to_modules: false, applies_to_interfaces: false, catalog_id: 'POSIX',       notes: '' },
+]
+
+/** Catalog of known standards for the add-custom dropdown */
 export interface StandardCatalogEntry {
   catalog_id: string
   name: string

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import * as api from '../api'
-import type { Program, SaveStatus } from '../types'
+import type { Program, ArmyBranch, SaveStatus } from '../types'
 
 export function useProgram(programId: string | number) {
   const [program, setProgram] = useState<Program | null>(null)
@@ -18,13 +18,21 @@ export function useProgram(programId: string | number) {
   const updateServiceBranch = useCallback(async (
     service_branch: Program['service_branch'],
     army_pae?: string | null,
+    army_branch?: ArmyBranch | null,
   ) => {
     if (!program) return
-    // Optimistic update so the PAE dropdown shows immediately
-    setProgram(prev => prev ? { ...prev, service_branch, army_pae: army_pae ?? null } : prev)
+    // Optimistic update so dropdowns reflect selection immediately
+    setProgram(prev => prev
+      ? { ...prev, service_branch, army_pae: army_pae ?? null, army_branch: army_branch ?? null }
+      : prev
+    )
     setSaveStatus('saving')
     try {
-      const updated = await api.updateProgram(programId, { service_branch, army_pae: army_pae ?? undefined })
+      const updated = await api.updateProgram(programId, {
+        service_branch,
+        army_pae: army_pae ?? null,
+        army_branch: army_branch ?? null,
+      })
       setProgram(updated)
       setSaveStatus('saved')
     } catch {

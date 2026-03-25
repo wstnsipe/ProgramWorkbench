@@ -1,24 +1,31 @@
 /**
- * StandardsEditor — Yes/No toggle table for standards.
+ * StandardsEditor — name + applicability (Modules / Interfaces) table.
  *
  * Design:
- * - Catalog rows pre-populated from standardsCatalog
- * - Yes/No toggle button pair per row
- * - Notes field (inline, collapsed until Yes)
- * - Custom standard entry at bottom
+ * - 4 default rows pre-seeded from DEFAULT_STANDARD_ROWS (catalog_id set, not removable)
+ * - Each row: standard name | Modules ☑ | Interfaces ☑ | Notes | × (custom only)
+ * - Add-custom row at the bottom
  */
 import { useState } from 'react'
 import type { StandardRow } from '../../types'
 
 interface Props {
   rows: StandardRow[]
-  onToggle: (index: number) => void
-  onUpdateNotes: (index: number, notes: string) => void
-  onAddCustom: (name: string) => void
-  onRemove: (index: number) => void
+  onToggleModules:    (index: number) => void
+  onToggleInterfaces: (index: number) => void
+  onUpdateNotes:      (index: number, notes: string) => void
+  onAddCustom:        (name: string) => void
+  onRemove:           (index: number) => void
 }
 
-export default function StandardsEditor({ rows, onToggle, onUpdateNotes, onAddCustom, onRemove }: Props) {
+export default function StandardsEditor({
+  rows,
+  onToggleModules,
+  onToggleInterfaces,
+  onUpdateNotes,
+  onAddCustom,
+  onRemove,
+}: Props) {
   const [customInput, setCustomInput] = useState('')
 
   function handleAddCustom() {
@@ -34,65 +41,71 @@ export default function StandardsEditor({ rows, onToggle, onUpdateNotes, onAddCu
         <thead>
           <tr>
             <th className="standards-table__col-name">Standard / Architecture</th>
-            <th className="standards-table__col-applies">Applies?</th>
+            <th className="standards-table__col-cb" title="Applies to module boundaries">Modules</th>
+            <th className="standards-table__col-cb" title="Applies to interface definitions">Interfaces</th>
             <th className="standards-table__col-notes">Notes</th>
             <th className="standards-table__col-del" />
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className={`standards-table__row ${row.applies ? 'standards-table__row--yes' : ''}`}>
-              <td className="standards-table__name">
-                {row.standard_name}
-                {row.catalog_id && (
-                  <span className="standards-table__catalog-id">{row.catalog_id}</span>
-                )}
-              </td>
-              <td className="standards-table__applies">
-                <div className="yes-no-toggle">
-                  <button
-                    className={`yes-no-toggle__btn ${row.applies ? 'yes-no-toggle__btn--yes' : ''}`}
-                    onClick={() => !row.applies && onToggle(i)}
-                    aria-pressed={row.applies}
-                  >
-                    Yes
-                  </button>
-                  <button
-                    className={`yes-no-toggle__btn ${!row.applies ? 'yes-no-toggle__btn--no' : ''}`}
-                    onClick={() => row.applies && onToggle(i)}
-                    aria-pressed={!row.applies}
-                  >
-                    No
-                  </button>
-                </div>
-              </td>
-              <td className="standards-table__notes">
-                {row.applies ? (
+          {rows.map((row, i) => {
+            const active = row.applies_to_modules || row.applies_to_interfaces
+            return (
+              <tr
+                key={i}
+                className={`standards-table__row${active ? ' standards-table__row--active' : ''}`}
+              >
+                <td className="standards-table__name">
+                  <span>{row.standard_name}</span>
+                  {row.catalog_id && (
+                    <span className="standards-table__catalog-id">{row.catalog_id}</span>
+                  )}
+                </td>
+
+                <td className="standards-table__cb">
+                  <input
+                    type="checkbox"
+                    checked={row.applies_to_modules}
+                    onChange={() => onToggleModules(i)}
+                    aria-label={`${row.standard_name} applies to modules`}
+                  />
+                </td>
+
+                <td className="standards-table__cb">
+                  <input
+                    type="checkbox"
+                    checked={row.applies_to_interfaces}
+                    onChange={() => onToggleInterfaces(i)}
+                    aria-label={`${row.standard_name} applies to interfaces`}
+                  />
+                </td>
+
+                <td className="standards-table__notes">
                   <input
                     className="standards-table__notes-input"
                     value={row.notes}
                     onChange={e => onUpdateNotes(i, e.target.value)}
-                    placeholder="Version, applicability notes…"
+                    placeholder="Version, scope notes…"
                     aria-label={`Notes for ${row.standard_name}`}
                   />
-                ) : (
-                  <span className="standards-table__notes-na">—</span>
-                )}
-              </td>
-              <td>
-                {!row.catalog_id && (
-                  <button
-                    className="standards-table__del-btn"
-                    onClick={() => onRemove(i)}
-                    aria-label={`Remove ${row.standard_name}`}
-                    title="Remove"
-                  >
-                    ×
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
+                </td>
+
+                <td className="standards-table__del">
+                  {/* Only custom rows (no catalog_id) are removable */}
+                  {!row.catalog_id && (
+                    <button
+                      className="standards-table__del-btn"
+                      onClick={() => onRemove(i)}
+                      aria-label={`Remove ${row.standard_name}`}
+                      title="Remove"
+                    >
+                      ×
+                    </button>
+                  )}
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
 
@@ -101,7 +114,7 @@ export default function StandardsEditor({ rows, onToggle, onUpdateNotes, onAddCu
           className="standards-editor__custom-input"
           value={customInput}
           onChange={e => setCustomInput(e.target.value)}
-          placeholder="Add custom standard (e.g., MIL-STD-810)"
+          placeholder="Add standard (e.g., MIL-STD-810, VICTORY, DO-178C)"
           onKeyDown={e => e.key === 'Enter' && handleAddCustom()}
         />
         <button

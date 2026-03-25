@@ -52,7 +52,7 @@ def update_program(program_id: int, body: ProgramUpdateV2, db: Session = Depends
     prog = db.query(models.Program).filter_by(id=program_id).first()
     if not prog:
         raise HTTPException(404, "Program not found")
-    for field, val in body.model_dump(exclude_none=True).items():
+    for field, val in body.model_dump(exclude_unset=True).items():
         if hasattr(prog, field):
             setattr(prog, field, val)
     db.commit()
