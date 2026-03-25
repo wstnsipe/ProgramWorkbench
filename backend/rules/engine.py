@@ -88,6 +88,34 @@ def evaluate_rules(inp: RulesInput) -> RulesResult:
                     field="module_count",
                 ))
 
+    # Rule 2b — Unit cost → module count recommendation
+    if inp.production_unit_cost is not None and inp.module_count > 0:
+        uc = inp.production_unit_cost
+        if uc < 1.0:
+            uc_lo, uc_hi = 1, 5
+        elif uc <= 10.0:
+            uc_lo, uc_hi = 5, 10
+        else:
+            uc_lo, uc_hi = 15, None  # "more than 15"
+
+        if uc_hi is not None:
+            out_of_range = inp.module_count < uc_lo or inp.module_count > uc_hi
+            range_str = f"{uc_lo}–{uc_hi}"
+        else:
+            out_of_range = inp.module_count < uc_lo
+            range_str = f">{uc_lo}"
+
+        if out_of_range:
+            violations.append(RuleViolation(
+                rule_id="UNIT_COST_MODULE_COUNT",
+                severity="WARN",
+                message=(
+                    f"Unit cost of ${uc:.1f}M suggests {range_str} modules; "
+                    f"{inp.module_count} currently defined. Verify modular boundary definitions."
+                ),
+                field="module_count",
+            ))
+
     # Rule 3 — Software-heavy or safety-critical → DO-178 / DO-297
     if inp.software_large_part or inp.safety_critical:
         result.modifiers.append(DocModifier.INCLUDE_DO178_DO297)
@@ -131,14 +159,30 @@ def evaluate_rules(inp: RulesInput) -> RulesResult:
             message="Similar programs exist — reuse type analysis (adapt / adopt / extend) required in modules.",
         ))
 
-    # Rule 10 — Short timeline → compression justification
+    # Rule 10 — Short timeline (<18 months) → commercial emphasis + compression rationale
     if inp.timeline_months is not None and inp.timeline_months < 18:
         violations.append(RuleViolation(
             rule_id="TIMELINE_SHORT",
             severity="WARN",
-            message=f"Timeline of {inp.timeline_months} months is below 18-month threshold; include schedule compression rationale.",
+            message=(
+                f"Timeline of {inp.timeline_months} months is below the 18-month threshold. "
+                "Include schedule compression rationale in the acquisition strategy."
+            ),
             field="timeline_months",
         ))
+        violations.append(RuleViolation(
+            rule_id="TIMELINE_COTS_EMPHASIS",
+            severity="WARN",
+            message=(
+                f"Rapid fielding ({inp.timeline_months} months) requires a commercial-first MOSA approach: "
+                "prioritize COTS/MOTS modules, emphasize open interface standards to enable fast integration, "
+                "and document commercial solution market research in the acquisition strategy."
+            ),
+            field="timeline_months",
+        ))
+        # Inject commercial-first modifier for document generation
+        if DocModifier.EMPHASIZE_COMMERCIAL not in result.modifiers:
+            result.modifiers.append(DocModifier.EMPHASIZE_COMMERCIAL)
 
     # Rule 11 — No modules but generation requested (hard gate upstream, logged here)
     if inp.module_count == 0:

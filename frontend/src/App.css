@@ -618,16 +618,41 @@ select {
   border-bottom-color: var(--accent);
 }
 
+/* Sufficiency strip — between header and tab content */
+.ws-suf-strip { padding: 10px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+
 /* Content Area */
 .ws-body {
   flex: 1;
   padding: 0 24px 48px;
 }
 
+.ws-body--with-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  padding-right: 0;
+}
+
+.ws-body--with-panel .ws-content {
+  flex: 1;
+  min-width: 0;
+}
+
 .ws-content {
   max-width: 1040px;
   margin: 0 auto;
   padding-top: 28px;
+}
+
+/* Evidence tab toggle button */
+.ws-tab--panel {
+  margin-left: auto;
+  opacity: 0.7;
+}
+.ws-tab--panel:hover,
+.ws-tab--panel.ws-tab--active {
+  opacity: 1;
 }
 
 /* Error/Loading states for workspace */
@@ -2216,6 +2241,16 @@ select {
   font-size: 11px;
   color: var(--text-muted);
   margin: 1px 0 0;
+  line-height: 1.4;
+}
+.field-warn {
+  font-size: 11px;
+  color: var(--warning, #92400e);
+  background: var(--warning-bg, #fffbeb);
+  border: 1px solid var(--warning-border, #fcd34d);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  margin: 4px 0 0;
   line-height: 1.4;
 }
 

@@ -22,7 +22,7 @@ try:
 except Exception:
     pass
 
-from routers import programs, wizard, modules, scenarios, standards, sufficiency, files, documents
+from routers import programs, brief, wizard, modules, scenarios, standards, sufficiency, files, documents, prefill, evidence
 
 app = FastAPI(
     title="Acquisition Program Workbench API v2",
@@ -53,6 +53,7 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 
 app.include_router(programs.router)
+app.include_router(brief.router)
 app.include_router(wizard.router)
 app.include_router(modules.router)
 app.include_router(scenarios.router)
@@ -60,6 +61,8 @@ app.include_router(standards.router)
 app.include_router(sufficiency.router)
 app.include_router(files.router)
 app.include_router(documents.router)
+app.include_router(prefill.router)
+app.include_router(evidence.router)
 
 
 # ---------------------------------------------------------------------------

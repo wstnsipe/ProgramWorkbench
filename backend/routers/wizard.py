@@ -20,8 +20,8 @@ def get_wizard(program_id: int, db: Session = Depends(get_db)):
     """
     _require_program(program_id, db)
     # Import existing wizard builder to avoid duplication
-    from main import _build_wizard_out  # type: ignore
-    return _build_wizard_out(program_id, db)
+    from main import _build_wizard_response  # type: ignore
+    return _build_wizard_response(program_id, db)
 
 
 @router.put("", status_code=204)

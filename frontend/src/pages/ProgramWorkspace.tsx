@@ -7,6 +7,10 @@ import ModulesTab from './ModulesTab'
 import DocumentsTab from './DocumentsTab'
 import ExemplarsTab from './ExemplarsTab'
 import KnowledgeTab from './KnowledgeTab'
+import SufficiencyBanner from '../components/ui/SufficiencyBanner'
+import EvidencePanel from '../components/ui/EvidencePanel'
+import { useSufficiency } from '../hooks/useSufficiency'
+import { useEvidence } from '../hooks/useEvidence'
 
 const API = import.meta.env.VITE_API_BASE_URL
 
@@ -24,6 +28,9 @@ export default function ProgramWorkspace() {
   const [program, setProgram] = useState<Program | null>(null)
   const [fetchError, setFetchError] = useState('')
   const [activeTab, setActiveTab] = useState<Tab>('Upload')
+  const [panelOpen, setPanelOpen] = useState(false)
+  const { result: sufficiency, loading: sufficiencyLoading, refresh: refreshSufficiency } = useSufficiency(id!)
+  const { data: evidenceData, loading: evidenceLoading } = useEvidence(id!, activeTab.toLowerCase(), panelOpen)
 
   useEffect(() => {
     async function fetchProgram() {
@@ -81,11 +88,27 @@ export default function ProgramWorkspace() {
               {tab}
             </button>
           ))}
+          <button
+            className={`ws-tab ws-tab--panel${panelOpen ? ' ws-tab--active' : ''}`}
+            onClick={() => setPanelOpen(o => !o)}
+            title="Toggle evidence panel"
+          >
+            Evidence
+          </button>
         </nav>
       </div>
 
+      {/* Sufficiency banner */}
+      <div className="ws-suf-strip">
+        <SufficiencyBanner
+          result={sufficiency}
+          loading={sufficiencyLoading}
+          onRefresh={refreshSufficiency}
+        />
+      </div>
+
       {/* Content */}
-      <div className="ws-body">
+      <div className={`ws-body${panelOpen ? ' ws-body--with-panel' : ''}`}>
         <div className="ws-content">
           {activeTab === 'Upload'    && <UploadTab    programId={id!} />}
           {activeTab === 'Brief'     && <BriefTab     programId={id!} />}
@@ -94,6 +117,16 @@ export default function ProgramWorkspace() {
           {activeTab === 'Exemplars' && <ExemplarsTab programId={id!} />}
           {activeTab === 'Knowledge' && <KnowledgeTab programId={id!} />}
         </div>
+        {panelOpen && (
+          <EvidencePanel
+            onClose={() => setPanelOpen(false)}
+            loading={evidenceLoading}
+            hasDocs={evidenceData?.has_docs ?? false}
+            chunks={evidenceData?.chunks ?? []}
+            warnings={sufficiency?.rule_violations ?? []}
+            context={activeTab}
+          />
+        )}
       </div>
     </div>
   )

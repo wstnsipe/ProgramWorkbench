@@ -19,11 +19,14 @@ class ProgramBrief(Base):
     program_description = Column(Text, nullable=True)
     dev_cost_estimate = Column(Float, nullable=True)
     production_unit_cost = Column(Float, nullable=True)
+    timeline_months = Column(Integer, nullable=True)
     attritable = Column(Boolean, nullable=True)
     sustainment_tail = Column(Boolean, nullable=True)
     software_large_part = Column(Boolean, nullable=True)
+    software_involved = Column(Boolean, nullable=True)
     mission_critical = Column(Boolean, nullable=True)
     safety_critical = Column(Boolean, nullable=True)
+    similar_programs_exist = Column(Boolean, nullable=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now(), nullable=False)
 
 

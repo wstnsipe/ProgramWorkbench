@@ -5,11 +5,45 @@ import Toast from '../components/Toast'
 import ModuleListEditor from '../components/brief/ModuleListEditor'
 import ScenarioTableEditor from '../components/brief/ScenarioTableEditor'
 import ServiceBranchField from '../components/brief/ServiceBranchField'
+import StandardsEditor from '../components/brief/StandardsEditor'
 import { useScenarios } from '../hooks/useScenarios'
 import { useProgram } from '../hooks/useProgram'
+import { useStandards } from '../hooks/useStandards'
+import { usePrefill } from '../hooks/usePrefill'
+import type { PrefillSuggestion } from '../hooks/usePrefill'
 import { moduleScenarioWarnings } from '../utils/moduleScenarioWarnings'
 import type { ModuleRow, ServiceBranch } from '../types'
 import { EMPTY_MODULE_ROW } from '../types'
+
+// ── SuggestionPill ─────────────────────────────────────────────────────────────
+
+function SuggestionPill({
+  suggestion,
+  onAccept,
+  onDismiss,
+}: {
+  suggestion: PrefillSuggestion
+  onAccept: (value: string) => void
+  onDismiss: () => void
+}) {
+  const preview = suggestion.suggested_value.length > 120
+    ? suggestion.suggested_value.slice(0, 120) + '…'
+    : suggestion.suggested_value
+  return (
+    <div className={`prefill-pill prefill-pill--${suggestion.confidence}`}>
+      <span className="prefill-pill__label">
+        {suggestion.confidence === 'high' ? '✦' : '◇'} Suggested from docs:
+      </span>
+      <span className="prefill-pill__text">{preview}</span>
+      <div className="prefill-pill__actions">
+        <button className="prefill-pill__accept" onClick={() => onAccept(suggestion.suggested_value)}>
+          Use this
+        </button>
+        <button className="prefill-pill__dismiss" onClick={onDismiss}>✕</button>
+      </div>
+    </div>
+  )
+}
 
 const API = import.meta.env.VITE_API_BASE_URL
 
@@ -19,6 +53,7 @@ interface ProgramBrief {
   program_description: string | null
   dev_cost_estimate: number | null
   production_unit_cost: number | null
+  timeline_months: number | null
   attritable: boolean | null
   sustainment_tail: boolean | null
   software_large_part: boolean | null
@@ -31,6 +66,7 @@ type BriefForm = {
   program_description: string
   dev_cost_estimate: string
   production_unit_cost: string
+  timeline_months: string
   attritable: boolean
   sustainment_tail: boolean
   software_large_part: boolean
@@ -42,6 +78,7 @@ const EMPTY_BRIEF: BriefForm = {
   program_description: '',
   dev_cost_estimate: '',
   production_unit_cost: '',
+  timeline_months: '',
   attritable: false,
   sustainment_tail: false,
   software_large_part: false,
@@ -54,6 +91,7 @@ function briefToForm(brief: ProgramBrief): BriefForm {
     program_description: brief.program_description ?? '',
     dev_cost_estimate: brief.dev_cost_estimate != null ? String(brief.dev_cost_estimate) : '',
     production_unit_cost: brief.production_unit_cost != null ? String(brief.production_unit_cost) : '',
+    timeline_months: brief.timeline_months != null ? String(brief.timeline_months) : '',
     attritable: brief.attritable ?? false,
     sustainment_tail: brief.sustainment_tail ?? false,
     software_large_part: brief.software_large_part ?? false,
@@ -102,6 +140,8 @@ export default function BriefTab({ programId }: { programId: string }) {
   )
   const { program, updateServiceBranch, saveStatus: branchSaveStatus } = useProgram(programId)
   const { scenarios, updateScenario, addScenario, removeScenario, save: saveScenarios } = useScenarios(programId)
+  const { rows: standards, toggleApplies, updateNotes, addCustomStandard, removeRow: removeStandard, save: saveStandards } = useStandards(programId)
+  const { fetchPrefill, getSuggestion, dismiss, loading: prefillLoading } = usePrefill(programId)
   const moduleScenarioAlerts = useMemo(
     () => moduleScenarioWarnings(modules, scenarios),
     [modules, scenarios],
@@ -188,6 +228,7 @@ export default function BriefTab({ programId }: { programId: string }) {
         program_description: form.program_description || null,
         dev_cost_estimate: form.dev_cost_estimate !== '' ? parseFloat(form.dev_cost_estimate) : null,
         production_unit_cost: form.production_unit_cost !== '' ? parseFloat(form.production_unit_cost) : null,
+        timeline_months: form.timeline_months !== '' ? parseInt(form.timeline_months, 10) : null,
         attritable: form.attritable,
         sustainment_tail: form.sustainment_tail,
         software_large_part: form.software_large_part,
@@ -221,6 +262,7 @@ export default function BriefTab({ programId }: { programId: string }) {
           body: JSON.stringify({ modules }),
         }),
         saveScenarios(),
+        saveStandards(),
       ])
 
       if (!briefRes.ok) {
@@ -279,6 +321,13 @@ export default function BriefTab({ programId }: { programId: string }) {
               onChange={handleText}
               placeholder="Describe the program, its mission, and key objectives…"
             />
+            {getSuggestion('program_description') && (
+              <SuggestionPill
+                suggestion={getSuggestion('program_description')!}
+                onAccept={v => setForm(f => ({ ...f, program_description: v }))}
+                onDismiss={() => dismiss('program_description')}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -319,6 +368,27 @@ export default function BriefTab({ programId }: { programId: string }) {
                 placeholder="0.00"
               />
             </div>
+            <div className="form-field">
+              <label htmlFor="timeline_months">Timeline to Initial Fielding (months)</label>
+              <p className="field-helper">
+                Timelines under 18 months trigger a commercial-first recommendation
+              </p>
+              <input
+                id="timeline_months"
+                name="timeline_months"
+                type="number"
+                min="1"
+                step="1"
+                value={form.timeline_months}
+                onChange={handleText}
+                placeholder="e.g. 24"
+              />
+              {form.timeline_months !== '' && parseInt(form.timeline_months, 10) < 18 && (
+                <p className="field-warn">
+                  ⚠ Under 18 months — prioritize COTS/MOTS modules and document commercial market research in the acquisition strategy.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -337,6 +407,13 @@ export default function BriefTab({ programId }: { programId: string }) {
               onChange={e => handleWizardText('e_similar_previous_programs', e.target.value)}
               placeholder="Describe analogous programs or systems…"
             />
+            {getSuggestion('e_similar_previous_programs') && (
+              <SuggestionPill
+                suggestion={getSuggestion('e_similar_previous_programs')!}
+                onAccept={v => handleWizardText('e_similar_previous_programs', v)}
+                onDismiss={() => dismiss('e_similar_previous_programs')}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -355,6 +432,13 @@ export default function BriefTab({ programId }: { programId: string }) {
               onChange={e => handleWizardText('f_tech_challenges_and_risk_areas', e.target.value)}
               placeholder="Describe technical challenges and risk areas…"
             />
+            {getSuggestion('f_tech_challenges_and_risk_areas') && (
+              <SuggestionPill
+                suggestion={getSuggestion('f_tech_challenges_and_risk_areas')!}
+                onAccept={v => handleWizardText('f_tech_challenges_and_risk_areas', v)}
+                onDismiss={() => dismiss('f_tech_challenges_and_risk_areas')}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -401,18 +485,17 @@ export default function BriefTab({ programId }: { programId: string }) {
       {/* Standards & Architectures by Module */}
       <div className="form-card">
         <div className="form-card__header">
-          <h3 className="form-card__title">Known Standards and Architectures (by Module)</h3>
-          <p className="form-card__desc">Map candidate modules to relevant open standards, reference architectures, or interface standards (e.g., FACE, VITA 65/SOSA, VICTORY, GVA, CMOSS).</p>
+          <h3 className="form-card__title">Known Standards and Architectures</h3>
+          <p className="form-card__desc">Mark which open standards, reference architectures, or interface standards apply to this program (e.g., FACE, VITA 65/SOSA, VICTORY, GVA, CMOSS). Add custom standards as needed.</p>
         </div>
         <div className="form-card__body">
-          <div className="form-field">
-            <textarea
-              rows={4}
-              value={wizardAnswers['i_known_standards_architectures_mapping'] ?? ''}
-              onChange={e => handleWizardText('i_known_standards_architectures_mapping', e.target.value)}
-              placeholder="Map modules to applicable standards and architectures…"
-            />
-          </div>
+          <StandardsEditor
+            rows={standards}
+            onToggle={toggleApplies}
+            onUpdateNotes={updateNotes}
+            onAddCustom={addCustomStandard}
+            onRemove={removeStandard}
+          />
         </div>
       </div>
 
@@ -530,6 +613,9 @@ export default function BriefTab({ programId }: { programId: string }) {
       <div className="form-actions">
         <Button onClick={handleSave} loading={saving}>
           {saving ? 'Saving…' : 'Save'}
+        </Button>
+        <Button onClick={fetchPrefill} loading={prefillLoading} variant="secondary">
+          {prefillLoading ? 'Scanning docs…' : 'Prefill from docs'}
         </Button>
         {updatedAt && (
           <span className="save-status">

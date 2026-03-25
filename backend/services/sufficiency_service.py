@@ -174,6 +174,11 @@ def compute_sufficiency(
     )
     rules = evaluate_rules(rules_inp)
 
+    # ---- Module ↔ Scenario alignment checks ----
+    alignment_violations = _check_module_scenario_alignment(modules, scenarios)
+
+    all_violations = list(rules.violations) + alignment_violations
+
     return SufficiencyResult(
         level=level,
         score=score,
@@ -185,6 +190,75 @@ def compute_sufficiency(
         modifiers=[m.value for m in rules.modifiers],
         rule_violations=[
             {"rule_id": v.rule_id, "severity": v.severity, "message": v.message}
-            for v in rules.violations
+            for v in all_violations
         ],
     )
+
+
+# ---------------------------------------------------------------------------
+# Module ↔ Scenario alignment checks
+# ---------------------------------------------------------------------------
+
+def _norm(text: str) -> str:
+    """Lowercase + collapse whitespace."""
+    return " ".join(text.lower().split())
+
+
+def _check_module_scenario_alignment(modules: list, scenarios: list) -> list:
+    """
+    Returns RuleViolation(severity=WARN) entries for:
+      1. A named module that is not mentioned in any scenario description
+      2. A scenario module_name that doesn't match any known module
+    Matching is case-insensitive substring (name ⊆ text or text ⊆ name).
+    Skips check when either list is empty.
+    """
+    from rules.models import RuleViolation
+
+    violations: list = []
+
+    module_names = [getattr(m, "name", "") or "" for m in modules]
+    module_names = [n for n in module_names if n.strip()]
+    if not module_names or not scenarios:
+        return violations
+
+    # Build combined scenario corpus for fast lookup
+    scenario_text_blob = " ".join(
+        (getattr(s, "description", "") or "") + " " + (getattr(s, "module_name", "") or "")
+        for s in scenarios
+    ).lower()
+
+    # ── Rule 1: module not referenced in any scenario ───────────────────────
+    for name in module_names:
+        if _norm(name) not in scenario_text_blob:
+            safe_id = _norm(name).replace(" ", "_").upper()[:40]
+            violations.append(RuleViolation(
+                rule_id=f"MODULE_NOT_IN_SCENARIO_{safe_id}",
+                severity="WARN",
+                message=f'Module "{name}" is not referenced in any MOSA scenario.',
+            ))
+
+    # ── Rule 2: scenario references a module not in the module list ─────────
+    known_norms = {_norm(n) for n in module_names}
+    seen_unknowns: set = set()  # deduplicate per scenario_module_name
+
+    for s in scenarios:
+        sname = (getattr(s, "module_name", "") or "").strip()
+        if not sname:
+            continue
+        norm_sname = _norm(sname)
+        if norm_sname in seen_unknowns:
+            continue
+        matched = any(
+            norm_sname in known or known in norm_sname
+            for known in known_norms
+        )
+        if not matched:
+            seen_unknowns.add(norm_sname)
+            safe_id = norm_sname.replace(" ", "_").upper()[:40]
+            violations.append(RuleViolation(
+                rule_id=f"SCENARIO_UNKNOWN_MODULE_{safe_id}",
+                severity="WARN",
+                message=f'Scenario references "{sname}" which is not in the module list.',
+            ))
+
+    return violations

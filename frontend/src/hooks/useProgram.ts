@@ -20,6 +20,8 @@ export function useProgram(programId: string | number) {
     army_pae?: string | null,
   ) => {
     if (!program) return
+    // Optimistic update so the PAE dropdown shows immediately
+    setProgram(prev => prev ? { ...prev, service_branch, army_pae: army_pae ?? null } : prev)
     setSaveStatus('saving')
     try {
       const updated = await api.updateProgram(programId, { service_branch, army_pae: army_pae ?? undefined })
