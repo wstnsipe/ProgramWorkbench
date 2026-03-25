@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import '../App.css'
 import Button from '../components/Button'
 import Toast from '../components/Toast'
+import ModuleListEditor from '../components/brief/ModuleListEditor'
+import type { ModuleRow } from '../types'
+import { EMPTY_MODULE_ROW } from '../types'
 
 const API = import.meta.env.VITE_API_BASE_URL
 
@@ -28,13 +31,6 @@ type BriefForm = {
   software_large_part: boolean
   mission_critical: boolean
   safety_critical: boolean
-}
-
-export interface ModuleItem {
-  name: string
-  description: string
-  rationale: string
-  interfaces: string
 }
 
 const EMPTY_BRIEF: BriefForm = {
@@ -89,169 +85,16 @@ const BOOL_FIELDS: { name: keyof BriefForm; label: string; helper: string }[] = 
   },
 ]
 
-// ── ModulesBuilder ────────────────────────────────────────────────────────────
-
-const emptyDraft = (): ModuleItem => ({ name: '', description: '', rationale: '', interfaces: '' })
-
-interface ModulesBuilderProps {
-  modules: ModuleItem[]
-  onChange: (modules: ModuleItem[]) => void
-}
-
-function ModulesBuilder({ modules, onChange }: ModulesBuilderProps) {
-  const [draft, setDraft] = useState<ModuleItem>(emptyDraft())
-  const [editingIndex, setEditingIndex] = useState<number | null>(null)
-  const [nameError, setNameError] = useState(false)
-
-  function setField(field: keyof ModuleItem, value: string) {
-    setDraft(prev => ({ ...prev, [field]: value }))
-    if (field === 'name' && value.trim()) setNameError(false)
-  }
-
-  function commitDraft() {
-    if (!draft.name.trim()) { setNameError(true); return }
-    if (editingIndex !== null) {
-      onChange(modules.map((m, i) => i === editingIndex ? { ...draft } : m))
-      setEditingIndex(null)
-    } else {
-      onChange([...modules, { ...draft }])
-    }
-    setDraft(emptyDraft())
-    setNameError(false)
-  }
-
-  function startEdit(i: number) {
-    setDraft({ ...modules[i] })
-    setEditingIndex(i)
-    setNameError(false)
-  }
-
-  function cancelEdit() {
-    setDraft(emptyDraft())
-    setEditingIndex(null)
-    setNameError(false)
-  }
-
-  function deleteModule(i: number) {
-    onChange(modules.filter((_, idx) => idx !== i))
-    if (editingIndex === i) { setEditingIndex(null); setDraft(emptyDraft()) }
-  }
-
-  const isEditing = editingIndex !== null
-
-  return (
-    <div className="mb-form">
-      <div className="mb-form-fields">
-        <div className="mb-field">
-          <label className="mb-label">
-            Module Name <span className="mb-required">*</span>
-          </label>
-          <input
-            className={`mb-input${nameError ? ' mb-input-error' : ''}`}
-            value={draft.name}
-            onChange={e => setField('name', e.target.value)}
-            placeholder="e.g. Core Software, Navigation System…"
-          />
-          {nameError && <span className="mb-error-msg">Name is required</span>}
-        </div>
-
-        <div className="mb-field">
-          <label className="mb-label">Description</label>
-          <textarea
-            className="mb-textarea"
-            value={draft.description}
-            onChange={e => setField('description', e.target.value)}
-            rows={2}
-            placeholder="Brief description of what this module does…"
-          />
-        </div>
-
-        <div className="mb-field">
-          <label className="mb-label">Rationale / Why a module?</label>
-          <textarea
-            className="mb-textarea"
-            value={draft.rationale}
-            onChange={e => setField('rationale', e.target.value)}
-            rows={2}
-            placeholder="Why should this be a distinct module?"
-          />
-        </div>
-
-        <div className="mb-field">
-          <label className="mb-label">Likely Interfaces</label>
-          <input
-            className="mb-input"
-            value={draft.interfaces}
-            onChange={e => setField('interfaces', e.target.value)}
-            placeholder="e.g. FACE, SOSA, MIL-STD-1553…"
-          />
-        </div>
-
-        <div className="mb-form-actions">
-          <button className="mb-add-btn" onClick={commitDraft}>
-            {isEditing ? 'Update module' : '+ Add module'}
-          </button>
-          {isEditing && (
-            <button className="mb-cancel-btn" onClick={cancelEdit}>
-              Cancel
-            </button>
-          )}
-        </div>
-      </div>
-
-      {modules.length > 0 && (
-        <div className="mb-list">
-          <div className="mb-list-header">Added modules ({modules.length})</div>
-          {modules.map((mod, i) => (
-            <div
-              key={i}
-              className={`mb-module-row${editingIndex === i ? ' mb-module-row-editing' : ''}`}
-            >
-              <div className="mb-module-info">
-                <span className="mb-module-name">{mod.name}</span>
-                {mod.description && (
-                  <span className="mb-module-detail">{mod.description}</span>
-                )}
-                {mod.rationale && (
-                  <span className="mb-module-detail mb-module-rationale">↳ {mod.rationale}</span>
-                )}
-                {mod.interfaces && (
-                  <span className="mb-module-detail mb-module-interfaces">⇄ {mod.interfaces}</span>
-                )}
-              </div>
-              <div className="mb-module-actions">
-                <button
-                  className="mb-row-btn"
-                  onClick={() => startEdit(i)}
-                  disabled={isEditing && editingIndex !== i}
-                >
-                  Edit
-                </button>
-                <button
-                  className="mb-row-btn mb-row-btn-danger"
-                  onClick={() => deleteModule(i)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {modules.length === 0 && (
-        <div className="mb-empty">No modules added yet. Fill in the form above and click Add module.</div>
-      )}
-    </div>
-  )
-}
-
 // ── Main BriefTab ─────────────────────────────────────────────────────────────
+
+const BASELINE_ROWS = 5
 
 export default function BriefTab({ programId }: { programId: string }) {
   const [form, setForm] = useState<BriefForm>(EMPTY_BRIEF)
   const [wizardAnswers, setWizardAnswers] = useState<Record<string, string>>({})
-  const [modules, setModules] = useState<ModuleItem[]>([])
+  const [modules, setModules] = useState<ModuleRow[]>(
+    Array.from({ length: BASELINE_ROWS }, () => ({ ...EMPTY_MODULE_ROW }))
+  )
   const [mosarepoSearched, setMosarepoSearched] = useState('')
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -259,9 +102,10 @@ export default function BriefTab({ programId }: { programId: string }) {
 
   useEffect(() => {
     async function fetchAll() {
-      const [briefRes, wizardRes] = await Promise.all([
+      const [briefRes, wizardRes, modulesRes] = await Promise.all([
         fetch(`${API}/programs/${programId}/brief`),
         fetch(`${API}/programs/${programId}/wizard`),
+        fetch(`${API}/programs/${programId}/modules`),
       ])
 
       if (briefRes.ok) {
@@ -278,16 +122,24 @@ export default function BriefTab({ programId }: { programId: string }) {
         }
         setWizardAnswers(answers)
         setMosarepoSearched((wizard.answers as Record<string, unknown>)['o_mosa_repo_searched'] as string ?? '')
+      }
 
-        const mods = (wizard.answers as Record<string, unknown>)['modules']
-        if (Array.isArray(mods)) {
-          setModules(mods.map((m: Record<string, string>) => ({
-            name: m.name || '',
-            description: m.description || '',
-            rationale: m.rationale || '',
-            interfaces: m.interfaces || '',
-          })))
-        }
+      if (modulesRes.ok) {
+        const mods: Array<Record<string, unknown>> = await modulesRes.json()
+        const loaded: ModuleRow[] = mods.map(m => ({
+          name: String(m.name ?? ''),
+          description: String(m.description ?? ''),
+          rationale: String(m.rationale ?? ''),
+          key_interfaces: String(m.key_interfaces ?? ''),
+          standards: String(m.standards ?? ''),
+          tech_risk: Boolean(m.tech_risk),
+          obsolescence_risk: Boolean(m.obsolescence_risk),
+          cots_candidate: Boolean(m.cots_candidate),
+          future_recompete: Boolean(m.future_recompete),
+        }))
+        const padded = [...loaded]
+        while (padded.length < BASELINE_ROWS) padded.push({ ...EMPTY_MODULE_ROW })
+        setModules(padded)
       }
     }
     fetchAll()
@@ -303,6 +155,18 @@ export default function BriefTab({ programId }: { programId: string }) {
 
   function handleWizardText(id: string, value: string) {
     setWizardAnswers(prev => ({ ...prev, [id]: value }))
+  }
+
+  function handleModuleUpdate(index: number, field: keyof ModuleRow, value: string | boolean) {
+    setModules(prev => prev.map((row, i) => i === index ? { ...row, [field]: value } : row))
+  }
+
+  function handleModuleAdd() {
+    setModules(prev => [...prev, { ...EMPTY_MODULE_ROW }])
+  }
+
+  function handleModuleRemove(index: number) {
+    setModules(prev => prev.filter((_, i) => i !== index))
   }
 
   async function handleSave() {
@@ -328,7 +192,6 @@ export default function BriefTab({ programId }: { programId: string }) {
         ...wizardAnswers,
         o_mosa_repo_searched: mosarepoSearched,
       }
-      if (modules.length > 0) wizardPayload['modules'] = modules
 
       const [briefRes] = await Promise.all([
         fetch(`${API}/programs/${programId}/brief`, {
@@ -340,6 +203,11 @@ export default function BriefTab({ programId }: { programId: string }) {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ answers: wizardPayload }),
+        }),
+        fetch(`${API}/programs/${programId}/modules`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ modules }),
         }),
       ])
 
@@ -484,7 +352,12 @@ export default function BriefTab({ programId }: { programId: string }) {
           <p className="form-card__desc">Add each functional module or subsystem being considered for the program architecture. Include a description and rationale for each.</p>
         </div>
         <div className="form-card__body">
-          <ModulesBuilder modules={modules} onChange={setModules} />
+          <ModuleListEditor
+            rows={modules}
+            onUpdate={handleModuleUpdate}
+            onAdd={handleModuleAdd}
+            onRemove={handleModuleRemove}
+          />
         </div>
       </div>
 
