@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 
 import models
 from database import get_db
-from contracts import ModuleIn as ModuleInV2, ModuleOut as ModuleOutV2, ModulesBulkIn
+from contracts import ModuleIn as ModuleInV2, ModuleOut as ModuleOutV2, ModulesBulkIn, RuleViolationOut
+from rules.mismatch import check_mismatches
 
 router = APIRouter(prefix="/programs/{program_id}/modules", tags=["modules"])
 
@@ -62,6 +63,31 @@ def replace_modules(
     for row in created:
         db.refresh(row)
     return created
+
+
+@router.get("/mismatches", response_model=List[RuleViolationOut])
+def get_module_mismatches(program_id: int, db: Session = Depends(get_db)):
+    """
+    GET /programs/{program_id}/modules/mismatches
+
+    Returns WARN-level violations for module-to-scenario coverage gaps.
+    No LLM — pure name matching.
+    """
+    _require_program(program_id, db)
+    modules = db.query(models.Module).filter_by(program_id=program_id).all()
+    module_names = [m.name for m in modules]
+
+    scenario_module_names: list[str] = []
+    scenario_descriptions: list[str] = []
+    try:
+        from models_v2 import MosaScenario
+        scenarios = db.query(MosaScenario).filter_by(program_id=program_id).all()
+        scenario_module_names = [s.module_name or "" for s in scenarios]
+        scenario_descriptions = [s.description or "" for s in scenarios]
+    except Exception:
+        pass
+
+    return check_mismatches(module_names, scenario_module_names, scenario_descriptions)
 
 
 @router.delete("/{module_id}", status_code=204)

@@ -1640,6 +1640,32 @@ select {
   cursor: not-allowed;
 }
 
+.mismatch-warnings {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mismatch-warning-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--yellow-low-bg, #fffbe6);
+  border-left: 3px solid var(--yellow-low-border, #f0c040);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.mismatch-warning-icon {
+  flex-shrink: 0;
+  color: #b08000;
+  font-size: 13px;
+  margin-top: 1px;
+}
+
 .modules-table {
   width: 100%;
   border-collapse: collapse;

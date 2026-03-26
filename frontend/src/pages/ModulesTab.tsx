@@ -47,6 +47,7 @@ export default function ModulesTab({ programId }: { programId: string }) {
   const [form, setForm] = useState<ModuleForm>(BLANK)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ kind: 'success' | 'error' | 'info'; message: string } | null>(null)
+  const [mismatches, setMismatches] = useState<{ rule_id: string; message: string }[]>([])
 
   async function load() {
     setLoading(true)
@@ -58,6 +59,11 @@ export default function ModulesTab({ programId }: { programId: string }) {
     }
     setModules(await res.json())
     setLoading(false)
+    // Fire-and-forget mismatch check
+    fetch(`${API}/programs/${programId}/modules/mismatches`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setMismatches)
+      .catch(() => {})
   }
 
   useEffect(() => { load() }, [programId])
@@ -179,6 +185,16 @@ export default function ModulesTab({ programId }: { programId: string }) {
         </div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
+          {mismatches.length > 0 && (
+            <div className="mismatch-warnings">
+              {mismatches.map(w => (
+                <div key={w.rule_id + w.message} className="mismatch-warning-item">
+                  <span className="mismatch-warning-icon">⚠</span>
+                  {w.message}
+                </div>
+              ))}
+            </div>
+          )}
           <table className="modules-table">
             <thead>
               <tr>
