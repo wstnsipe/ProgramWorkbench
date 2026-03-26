@@ -16,6 +16,12 @@ ProgramOutV2    = ProgramOut
 router = APIRouter(prefix="/programs", tags=["programs"])
 
 
+@router.get("", response_model=list[ProgramOutV2])
+def list_programs(db: Session = Depends(get_db)):
+    """GET /programs — list all programs, newest first."""
+    return db.query(models.Program).order_by(models.Program.id.desc()).all()
+
+
 @router.post("", response_model=ProgramOutV2, status_code=201)
 def create_program(body: ProgramCreateV2, db: Session = Depends(get_db)):
     """
