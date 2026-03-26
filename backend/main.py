@@ -78,6 +78,15 @@ with engine.connect() as _conn:
         "ALTER TABLE file_chunks ADD COLUMN source_type TEXT NOT NULL DEFAULT 'program_input'",
         "ALTER TABLE file_chunks ADD COLUMN embedding vector(1536)",
         "ALTER TABLE modules ADD COLUMN description TEXT",
+        "ALTER TABLE modules ADD COLUMN future_recompete BOOLEAN NOT NULL DEFAULT FALSE",
+        # programs — new columns (IF NOT EXISTS avoids error if already present)
+        "ALTER TABLE programs ADD COLUMN IF NOT EXISTS service_branch TEXT",
+        "ALTER TABLE programs ADD COLUMN IF NOT EXISTS army_pae TEXT",
+        "ALTER TABLE programs ADD COLUMN IF NOT EXISTS army_branch TEXT",
+        "ALTER TABLE programs ADD COLUMN IF NOT EXISTS mig_id TEXT",
+        # program_standards — applicability columns
+        "ALTER TABLE program_standards ADD COLUMN IF NOT EXISTS applies_to_modules BOOLEAN NOT NULL DEFAULT FALSE",
+        "ALTER TABLE program_standards ADD COLUMN IF NOT EXISTS applies_to_interfaces BOOLEAN NOT NULL DEFAULT FALSE",
         # Embedding cache table (CREATE IF NOT EXISTS — fully idempotent)
         """
         CREATE TABLE IF NOT EXISTS embedding_cache (
