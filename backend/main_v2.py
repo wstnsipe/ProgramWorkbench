@@ -107,17 +107,6 @@ app.include_router(prefill.router)
 app.include_router(evidence.router)
 
 
-# ---------------------------------------------------------------------------
-# Mount legacy app for endpoints not yet migrated
-# ---------------------------------------------------------------------------
-
-try:
-    from main import app as legacy_app  # type: ignore
-    app.mount("/v1", legacy_app)
-except Exception:
-    pass  # main.py may not import cleanly in all environments
-
-
 @app.get("/health")
 def health():
     return {"status": "ok", "version": "2.0.0"}
