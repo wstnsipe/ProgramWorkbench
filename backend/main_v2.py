@@ -23,40 +23,45 @@ try:
 except Exception:
     pass
 
-# Enable pgvector extension then create all tables
-with engine.connect() as _conn:
-    try:
-        _conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-        _conn.commit()
-    except Exception:
-        _conn.rollback()
-
-Base.metadata.create_all(bind=engine)
-
-# Idempotent column migrations — safe to re-run; errors mean column already exists
-with engine.connect() as _conn:
-    for _stmt in [
-        # programs — new columns added after initial deploy
-        "ALTER TABLE programs ADD COLUMN service_branch TEXT",
-        "ALTER TABLE programs ADD COLUMN army_pae TEXT",
-        "ALTER TABLE programs ADD COLUMN army_branch TEXT",
-        "ALTER TABLE programs ADD COLUMN mig_id TEXT",
-        # program_standards — applicability split
-        "ALTER TABLE program_standards ADD COLUMN applies_to_modules BOOLEAN NOT NULL DEFAULT FALSE",
-        "ALTER TABLE program_standards ADD COLUMN applies_to_interfaces BOOLEAN NOT NULL DEFAULT FALSE",
-        # modules — extra flag columns
-        "ALTER TABLE modules ADD COLUMN future_recompete BOOLEAN NOT NULL DEFAULT FALSE",
-        # legacy migrations carried over from main.py
-        "ALTER TABLE program_files ADD COLUMN extracted_text TEXT",
-        "ALTER TABLE program_files ADD COLUMN source_type TEXT NOT NULL DEFAULT 'program_input'",
-        "ALTER TABLE file_chunks ADD COLUMN source_type TEXT NOT NULL DEFAULT 'program_input'",
-        "ALTER TABLE modules ADD COLUMN description TEXT",
-    ]:
+# Enable pgvector, create tables, run column migrations — all wrapped so a
+# failure never prevents the app from starting.
+try:
+    with engine.connect() as _conn:
         try:
-            _conn.execute(text(_stmt))
+            _conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
             _conn.commit()
         except Exception:
             _conn.rollback()
+except Exception:
+    pass
+
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception:
+    pass
+
+try:
+    with engine.connect() as _conn:
+        for _stmt in [
+            "ALTER TABLE programs ADD COLUMN service_branch TEXT",
+            "ALTER TABLE programs ADD COLUMN army_pae TEXT",
+            "ALTER TABLE programs ADD COLUMN army_branch TEXT",
+            "ALTER TABLE programs ADD COLUMN mig_id TEXT",
+            "ALTER TABLE program_standards ADD COLUMN applies_to_modules BOOLEAN NOT NULL DEFAULT FALSE",
+            "ALTER TABLE program_standards ADD COLUMN applies_to_interfaces BOOLEAN NOT NULL DEFAULT FALSE",
+            "ALTER TABLE modules ADD COLUMN future_recompete BOOLEAN NOT NULL DEFAULT FALSE",
+            "ALTER TABLE program_files ADD COLUMN extracted_text TEXT",
+            "ALTER TABLE program_files ADD COLUMN source_type TEXT NOT NULL DEFAULT 'program_input'",
+            "ALTER TABLE file_chunks ADD COLUMN source_type TEXT NOT NULL DEFAULT 'program_input'",
+            "ALTER TABLE modules ADD COLUMN description TEXT",
+        ]:
+            try:
+                _conn.execute(text(_stmt))
+                _conn.commit()
+            except Exception:
+                _conn.rollback()
+except Exception:
+    pass
 
 from routers import programs, brief, wizard, modules, scenarios, standards, sufficiency, files, documents, prefill, evidence
 
