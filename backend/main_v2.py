@@ -42,24 +42,18 @@ except Exception:
 
 try:
     with engine.connect() as _conn:
-        for _stmt in [
-            "ALTER TABLE programs ADD COLUMN service_branch TEXT",
-            "ALTER TABLE programs ADD COLUMN army_pae TEXT",
-            "ALTER TABLE programs ADD COLUMN army_branch TEXT",
-            "ALTER TABLE programs ADD COLUMN mig_id TEXT",
-            "ALTER TABLE program_standards ADD COLUMN applies_to_modules BOOLEAN NOT NULL DEFAULT FALSE",
-            "ALTER TABLE program_standards ADD COLUMN applies_to_interfaces BOOLEAN NOT NULL DEFAULT FALSE",
-            "ALTER TABLE modules ADD COLUMN future_recompete BOOLEAN NOT NULL DEFAULT FALSE",
-            "ALTER TABLE program_files ADD COLUMN extracted_text TEXT",
-            "ALTER TABLE program_files ADD COLUMN source_type TEXT NOT NULL DEFAULT 'program_input'",
-            "ALTER TABLE file_chunks ADD COLUMN source_type TEXT NOT NULL DEFAULT 'program_input'",
-            "ALTER TABLE modules ADD COLUMN description TEXT",
-        ]:
-            try:
-                _conn.execute(text(_stmt))
-                _conn.commit()
-            except Exception:
-                _conn.rollback()
+        _conn.execute(text("""
+            ALTER TABLE programs ADD COLUMN IF NOT EXISTS service_branch TEXT;
+            ALTER TABLE programs ADD COLUMN IF NOT EXISTS army_pae TEXT;
+            ALTER TABLE programs ADD COLUMN IF NOT EXISTS army_branch TEXT;
+            ALTER TABLE programs ADD COLUMN IF NOT EXISTS mig_id TEXT;
+            ALTER TABLE modules ADD COLUMN IF NOT EXISTS description TEXT;
+            ALTER TABLE modules ADD COLUMN IF NOT EXISTS future_recompete BOOLEAN NOT NULL DEFAULT FALSE;
+            ALTER TABLE program_files ADD COLUMN IF NOT EXISTS extracted_text TEXT;
+            ALTER TABLE program_files ADD COLUMN IF NOT EXISTS source_type TEXT NOT NULL DEFAULT 'program_input';
+            ALTER TABLE file_chunks ADD COLUMN IF NOT EXISTS source_type TEXT NOT NULL DEFAULT 'program_input';
+        """))
+        _conn.commit()
 except Exception:
     pass
 
