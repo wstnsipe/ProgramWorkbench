@@ -1018,7 +1018,6 @@ select {
 
 /* ── Brief Tab ───────────────────────────────────────────────────── */
 .brief-tab {
-  max-width: 640px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -1029,7 +1028,6 @@ select {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 640px;
 }
 
 .form-field {
