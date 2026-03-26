@@ -12,6 +12,7 @@ To test locally:
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from database import Base, engine
 
@@ -21,6 +22,16 @@ try:
     import models_v2  # noqa: F401
 except Exception:
     pass
+
+# Enable pgvector extension then create all tables
+with engine.connect() as _conn:
+    try:
+        _conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        _conn.commit()
+    except Exception:
+        _conn.rollback()
+
+Base.metadata.create_all(bind=engine)
 
 from routers import programs, brief, wizard, modules, scenarios, standards, sufficiency, files, documents, prefill, evidence
 
@@ -43,6 +54,7 @@ ALLOWED_ORIGINS = os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
