@@ -287,6 +287,50 @@ class GenerateDocIn(BaseModel):
     force: bool = False    # regenerate even if current doc exists
 
 
+class RegenerateSectionIn(BaseModel):
+    """POST /programs/{id}/documents/{doc_id}/sections/regenerate"""
+    section_name: str      # exact SectionDef.name, e.g. "MOSA & Data Rights"
+
+
+class RegenerateSectionOut(BaseModel):
+    """Response from per-section regeneration"""
+    document_id: int
+    section_name: str
+    status: str            # "done" | "error"
+    error: Optional[str] = None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Tracking
+# ─────────────────────────────────────────────────────────────────────────────
+
+class AssumptionOut(BaseModel):
+    field: str      # output field where the assumption appears
+    text: str       # assumption text (contents of [ASSUMPTION: ...])
+
+
+class EvidenceOut(BaseModel):
+    source_type: str    # "structured_input" | "wizard_answer" | "file_chunk"
+    key: str
+    label: str
+
+
+class SectionTrackingOut(BaseModel):
+    section_name: str
+    assumptions: List[AssumptionOut]
+    evidence: List[EvidenceOut]
+    assumption_count: int
+    evidence_count: int
+
+
+class DocumentTrackingOut(BaseModel):
+    """GET /programs/{id}/documents/{doc_id}/tracking"""
+    document_id: int
+    doc_type: str
+    sections: List[SectionTrackingOut]
+    total_assumptions: int
+
+
 class GenerateDocOut(BaseModel):
     """POST /programs/{id}/documents/generate response (async job)"""
     job_id: str

@@ -25,6 +25,7 @@ import models
 from rules import evaluate_rules, RulesInput
 from services.sufficiency_service import compute_sufficiency
 from generation.section_generator import generate_section
+from generation.tracking import track_section
 from generation.section_schemas import (
     # RFI
     RfiOverviewSection, RfiMosaSection, RfiQuestionsSection, RfiDeliverablesSection,
@@ -58,21 +59,21 @@ _RFI_SECTIONS: list[SectionDef] = [
         name="Overview & Purpose",
         schema_class=RfiOverviewSection,
         instructions="Write a concise overview of the RFI, its purpose, and program context. 2–4 paragraphs.",
-        fact_keys=["program_name", "program_description", "service_branch", "dev_cost_estimate"],
+        fact_keys=["program_name", "program_description", "service_branch", "dev_cost_estimate", "similar_programs"],
         exemplar_pattern="overview",
     ),
     SectionDef(
         name="MOSA Requirements",
         schema_class=RfiMosaSection,
         instructions="List specific MOSA requirements for this program as bullet points. Reference MIG if known.",
-        fact_keys=["modules", "mig_id", "modifiers", "standards"],
+        fact_keys=["modules", "mig_id", "modifiers", "standards", "scenarios", "software_standards"],
         exemplar_pattern="mosa",
     ),
     SectionDef(
         name="Questions to Industry",
         schema_class=RfiQuestionsSection,
         instructions="Generate 8–12 specific questions to industry. Ground in program modules and MOSA requirements.",
-        fact_keys=["program_description", "modules", "standards", "scenarios"],
+        fact_keys=["program_description", "modules", "standards", "scenarios", "tech_challenges", "commercial_solutions"],
         exemplar_pattern="question",
     ),
     SectionDef(
@@ -89,42 +90,51 @@ _ACQ_STRATEGY_SECTIONS: list[SectionDef] = [
         name="Executive Summary",
         schema_class=AcqExecSummarySection,
         instructions="Write executive summary (3–5 sentences) and acquisition approach (1–2 paragraphs).",
-        fact_keys=["program_name", "program_description", "service_branch", "dev_cost_estimate", "timeline_months"],
+        fact_keys=["program_name", "program_description", "service_branch", "dev_cost_estimate", "timeline_months", "similar_programs"],
         exemplar_pattern="executive summary",
     ),
     SectionDef(
         name="Schedule & Milestones",
         schema_class=AcqScheduleSection,
-        instructions="Generate 4–8 acquisition milestones. Use timeline_months to space them. Include MS B, MS C, IOC.",
-        fact_keys=["timeline_months", "program_description", "attritable"],
+        instructions="Generate 4–8 acquisition milestones. Use timeline_months to space them. Include MS B, MS C, IOC. If rule_violations contains TIMELINE_SHORT, include schedule compression rationale.",
+        fact_keys=["timeline_months", "program_description", "attritable", "rule_violations"],
         exemplar_pattern="milestone",
     ),
     SectionDef(
         name="Cost Estimates",
         schema_class=AcqCostSection,
         instructions="Format cost estimates as narrative strings. If values unknown, use [ASSUMPTION: ...].",
-        fact_keys=["dev_cost_estimate", "production_unit_cost"],
+        fact_keys=["dev_cost_estimate", "production_unit_cost", "recommended_module_count_min", "recommended_module_count_max"],
         exemplar_pattern="cost",
     ),
     SectionDef(
         name="Risk Register",
         schema_class=AcqRiskSection,
-        instructions="Generate 4–6 acquisition risks with probability/impact/mitigation. Ground in tech_risk and module flags.",
-        fact_keys=["modules", "modifiers", "mission_critical", "safety_critical"],
+        instructions="Generate 4–6 acquisition risks with probability/impact/mitigation. Ground in module flags, tech_challenges, and rule_violations.",
+        fact_keys=["modules", "modifiers", "mission_critical", "safety_critical", "tech_challenges", "obsolescence_candidates", "rule_violations", "rules_flags"],
         exemplar_pattern="risk",
     ),
     SectionDef(
         name="MOSA & Data Rights",
         schema_class=AcqMosaSection,
-        instructions="Describe MOSA approach, list 5+ MOSA bullets, and explain data rights strategy.",
-        fact_keys=["modules", "mig_id", "standards", "modifiers", "scenarios"],
+        instructions=(
+            "Write a 1–2 paragraph mosa_approach stating the program's modular strategy and MIG reference. "
+            "Then produce one module_sustainability entry per module: state the scenario_type (reprocure/reuse/recompete) "
+            "drawn directly from scenarios data, list the interface_standards that govern that module's boundary, "
+            "explain in competition_rationale how those standards enable the scenario (independent award, upgrade path, "
+            "or technology refresh without re-engineering adjacent modules), and specify data_rights_required. "
+            "If HW_SW_SEPARATION modifier active, treat hardware platform and software payload as separate modules "
+            "with distinct boundaries even if not listed separately. "
+            "Close with a data_rights_approach paragraph covering the program-wide strategy."
+        ),
+        fact_keys=["modules", "mig_id", "standards", "scenarios", "commercial_solutions", "obsolescence_candidates", "rule_violations", "rules_flags"],
         exemplar_pattern="mosa",
     ),
     SectionDef(
         name="Contracting Strategy",
         schema_class=AcqContractingSection,
-        instructions="Describe contracting vehicle, competition strategy, and test/verification approach.",
-        fact_keys=["dev_cost_estimate", "attritable", "cots_count", "service_branch"],
+        instructions="Describe contracting vehicle, competition strategy, and test/verification approach. If EMPHASIZE_COMMERCIAL modifier is active, prioritize commercial-first strategy.",
+        fact_keys=["dev_cost_estimate", "attritable", "cots_count", "service_branch", "commercial_solutions", "modifiers", "rule_violations"],
         exemplar_pattern="contract",
     ),
 ]
@@ -134,28 +144,37 @@ _SEP_SECTIONS: list[SectionDef] = [
         name="Technical Reviews & Requirements",
         schema_class=SepTechSection,
         instructions="List technical review schedule (SRR, PDR, CDR, etc.) and describe requirements traceability approach.",
-        fact_keys=["timeline_months", "mission_critical", "safety_critical", "program_description"],
+        fact_keys=["timeline_months", "mission_critical", "safety_critical", "program_description", "tech_challenges"],
         exemplar_pattern="technical review",
     ),
     SectionDef(
         name="Architecture & MOSA",
         schema_class=SepArchSection,
-        instructions="Describe system architecture, MOSA compliance approach, and interface standards used.",
-        fact_keys=["modules", "standards", "mig_id", "modifiers"],
+        instructions=(
+            "Write a 1–2 paragraph architecture_description covering the system decomposition and MOSA approach. "
+            "Then produce one module_boundaries entry per module: describe what crosses the boundary "
+            "(data formats, control signals, RF interfaces, power), name the governing interface_standard, "
+            "and state in enables what that standard boundary makes possible (independent recompete, "
+            "technology insertion without adjacent re-design, government-directed upgrade). "
+            "If HW_SW_SEPARATION modifier active, populate hw_sw_separation_note explaining how hardware "
+            "and software are contractually and technically separated at this boundary. "
+            "Close with mosa_compliance summarizing compliance posture against the applicable MIG."
+        ),
+        fact_keys=["modules", "standards", "mig_id", "scenarios", "software_standards", "rules_flags"],
         exemplar_pattern="architecture",
     ),
     SectionDef(
         name="Risk Management",
         schema_class=SepRiskSection,
-        instructions="Generate 4–6 systems engineering risks with mitigations.",
-        fact_keys=["modules", "modifiers", "safety_critical"],
+        instructions="Generate 4–6 systems engineering risks with mitigations. Ground in tech_challenges, module flags, and rule_violations.",
+        fact_keys=["modules", "modifiers", "safety_critical", "tech_challenges", "obsolescence_candidates", "rule_violations", "rules_flags"],
         exemplar_pattern="risk",
     ),
     SectionDef(
         name="Verification & Validation",
         schema_class=SepVnVSection,
         instructions="Describe V&V approach, including DO-178 if applicable. List test levels.",
-        fact_keys=["modifiers", "safety_critical", "mission_critical", "software_large_part"],
+        fact_keys=["modifiers", "safety_critical", "mission_critical", "software_large_part", "software_standards", "rules_flags"],
         exemplar_pattern="verification",
     ),
 ]
@@ -165,21 +184,31 @@ _MCP_SECTIONS: list[SectionDef] = [
         name="Conformance Overview",
         schema_class=McpOverviewSection,
         instructions="Write MOSA conformance plan overview and list 4–6 conformance objectives.",
-        fact_keys=["program_name", "program_description", "mig_id", "modules"],
+        fact_keys=["program_name", "program_description", "mig_id", "modules", "scenarios"],
         exemplar_pattern="overview",
     ),
     SectionDef(
         name="Module Assessments",
         schema_class=McpModuleSection,
-        instructions="For each module, assess interface compliance, risks, and verification approach.",
-        fact_keys=["modules", "standards", "modifiers"],
+        instructions=(
+            "Produce one module_assessments entry per module. "
+            "Set scenario_type from scenarios data (reprocure/reuse/recompete); if no scenario is defined for a module, "
+            "flag this as a gap in competition_enablement. "
+            "In competition_enablement, state whether existing interface documentation (ICDs, SysML, API specs) "
+            "is sufficient for a new vendor to compete without access to the incumbent's proprietary data. "
+            "In interface_compliance, assess conformance to the applicable standards from the standards list. "
+            "List module-specific risks (not program-wide risks). "
+            "State a concrete verification_approach (analysis, inspection, demonstration, or test) "
+            "rather than generic language."
+        ),
+        fact_keys=["modules", "standards", "scenarios", "rule_violations", "obsolescence_candidates"],
         exemplar_pattern="module",
     ),
     SectionDef(
         name="Verification Milestones",
         schema_class=McpVerificationSection,
         instructions="Define conformance verification milestones and assessment criteria.",
-        fact_keys=["timeline_months", "mission_critical", "modules"],
+        fact_keys=["timeline_months", "mission_critical", "modules", "rule_violations"],
         exemplar_pattern="verification",
     ),
 ]
@@ -203,6 +232,7 @@ def _build_full_fact_pack(
     wizard_answers: dict,
     standards: list,
     rules_result: Any,
+    scenario_rows: list,
 ) -> dict[str, Any]:
     """Assemble all available program facts into a flat dict."""
     brief_d = brief.__dict__ if brief else {}
@@ -224,17 +254,30 @@ def _build_full_fact_pack(
         for s in standards
     ]
 
-    scenarios_raw = wizard_answers.get("g_mosa_scenarios", "[]")
-    try:
-        scenarios = json.loads(scenarios_raw) if isinstance(scenarios_raw, str) else (scenarios_raw or [])
-    except Exception:
-        scenarios = []
+    # Prefer MosaScenario table rows; fall back to wizard answer JSON blob
+    if scenario_rows:
+        scenarios = [
+            {
+                "scenario_type": s.scenario_type,
+                "module_name": s.module_name,
+                "description": s.description,
+            }
+            for s in scenario_rows
+        ]
+    else:
+        scenarios_raw = wizard_answers.get("g_mosa_scenarios", "[]")
+        try:
+            scenarios = json.loads(scenarios_raw) if isinstance(scenarios_raw, str) else (scenarios_raw or [])
+        except Exception:
+            scenarios = []
 
     return {
+        # Core identity
         "program_name": program.name,
         "service_branch": getattr(program, "service_branch", None),
         "army_pae": getattr(program, "army_pae", None),
         "mig_id": rules_result.mig_id,
+        # Brief fields
         "program_description": brief_d.get("program_description"),
         "dev_cost_estimate": brief_d.get("dev_cost_estimate"),
         "production_unit_cost": brief_d.get("production_unit_cost"),
@@ -245,12 +288,26 @@ def _build_full_fact_pack(
         "mission_critical": brief_d.get("mission_critical"),
         "safety_critical": brief_d.get("safety_critical"),
         "similar_programs_exist": brief_d.get("similar_programs_exist"),
+        # Structured sub-objects
         "modules": module_list,
         "cots_count": sum(1 for m in module_list if m.get("cots_candidate")),
         "scenarios": scenarios,
         "standards": standard_list,
+        # Named wizard answer fields (sliceable per section)
+        "tech_challenges": wizard_answers.get("f_tech_challenges_and_risk_areas"),
+        "similar_programs": wizard_answers.get("e_similar_previous_programs"),
+        "obsolescence_candidates": wizard_answers.get("j_obsolescence_candidates"),
+        "commercial_solutions": wizard_answers.get("k_commercial_solutions_by_module"),
+        "software_standards": wizard_answers.get("n_software_standards_architectures"),
+        # Rules engine outputs
         "modifiers": [m.value for m in rules_result.modifiers],
-        "wizard_answers": wizard_answers,
+        "rule_violations": [
+            {"rule_id": v.rule_id, "severity": v.severity, "message": v.message}
+            for v in rules_result.violations
+        ],
+        "rules_flags": rules_result.flags,
+        "recommended_module_count_min": rules_result.recommended_module_count_min,
+        "recommended_module_count_max": rules_result.recommended_module_count_max,
     }
 
 
@@ -259,29 +316,12 @@ def _slice_fact_pack(full: dict, keys: list[str]) -> dict:
     return {k: full[k] for k in keys if k in full}
 
 
-# ---------------------------------------------------------------------------
-# Main orchestrator
-# ---------------------------------------------------------------------------
-
-async def generate_document(
-    *,
-    db: Session,
-    program_id: int,
-    doc_type: str,
-    output_path: str,
-) -> dict[str, Any]:
+def _load_program_data(db: Session, program_id: int) -> dict[str, Any]:
     """
-    Generate a complete document for program_id.
-    Returns a dict of all assembled section outputs.
-
-    Caller is responsible for:
-      - Persisting a ProgramDocument record
-      - Calling the renderer to write the .docx file
+    Load all program data needed for generation and return a prepared full_facts dict.
+    Single source of truth used by both generate_document and generate_single_section.
+    Raises ValueError if the program does not exist.
     """
-    if doc_type not in SECTION_MAP:
-        raise ValueError(f"Unknown doc_type: {doc_type}")
-
-    # ---- Load data ----
     program = db.query(models.Program).filter_by(id=program_id).first()
     if not program:
         raise ValueError(f"Program {program_id} not found")
@@ -291,18 +331,18 @@ async def generate_document(
     answers_rows = db.query(models.ProgramAnswer).filter_by(program_id=program_id).all()
     wizard_answers = {r.question_id: r.answer_text for r in answers_rows}
 
-    # Load standards from new table (graceful fallback if table doesn't exist yet)
     try:
         from models_v2 import ProgramStandard
         standards = db.query(ProgramStandard).filter_by(program_id=program_id).all()
     except Exception:
         standards = []
 
-    file_count = db.query(models.ProgramFile).filter_by(
-        program_id=program_id, source_type="program_input"
-    ).count()
+    try:
+        from models_v2 import MosaScenario
+        scenario_rows = db.query(MosaScenario).filter_by(program_id=program_id).all()
+    except Exception:
+        scenario_rows = []
 
-    # ---- Run rules engine ----
     rules_inp = RulesInput(
         service_branch=getattr(program, "service_branch", None),
         army_pae=getattr(program, "army_pae", None),
@@ -321,25 +361,51 @@ async def generate_document(
     )
     rules_result = evaluate_rules(rules_inp)
 
-    # ---- Build fact pack ----
     full_facts = _build_full_fact_pack(
-        program, brief, modules, wizard_answers, standards, rules_result
+        program, brief, modules, wizard_answers, standards, rules_result, scenario_rows
     )
+    # Attach the program ORM object so callers can read program.name etc.
+    full_facts["_program"] = program
+    full_facts["_rules_result"] = rules_result
+    return full_facts
+
+
+# ---------------------------------------------------------------------------
+# Main orchestrator
+# ---------------------------------------------------------------------------
+
+def generate_document(
+    *,
+    db: Session,
+    program_id: int,
+    doc_type: str,
+    output_path: str,
+) -> dict[str, Any]:
+    """
+    Generate a complete document for program_id.
+    Returns a dict of all assembled section outputs.
+
+    Caller is responsible for:
+      - Persisting a ProgramDocument record
+      - Calling the renderer to write the .docx file
+    """
+    if doc_type not in SECTION_MAP:
+        raise ValueError(f"Unknown doc_type: {doc_type}")
+
+    full_facts = _load_program_data(db, program_id)
+    program = full_facts.pop("_program")
+    rules_result = full_facts.pop("_rules_result")
 
     # ---- Generate sections ----
     section_defs = SECTION_MAP[doc_type]
     assembled: dict[str, Any] = {}
+    section_tracking: dict[str, Any] = {}
 
     for sec in section_defs:
         logger.info("Generating section '%s' for program %d (%s)", sec.name, program_id, doc_type)
 
-        # Retrieve supporting chunks (hook into existing retrieval)
         chunks = _retrieve_chunks_for_section(db, program_id, sec, full_facts)
-
-        # Retrieve exemplar style excerpt
         style_excerpt = _get_exemplar_style(db, program_id, doc_type, sec.exemplar_pattern)
-
-        # Slice fact pack to only what this section needs
         fact_pack = _slice_fact_pack(full_facts, sec.fact_keys)
 
         section_output = generate_section(
@@ -355,14 +421,67 @@ async def generate_document(
         )
         assembled[sec.name] = section_output
 
+        tracking = track_section(fact_pack, chunks, section_output)
+        section_tracking[sec.name] = tracking.model_dump()
+
     assembled["_meta"] = {
         "program_id": program_id,
         "doc_type": doc_type,
         "mig_id": rules_result.mig_id,
         "modifiers": [m.value for m in rules_result.modifiers],
+        "section_tracking": section_tracking,
     }
 
     return assembled
+
+
+def generate_single_section(
+    *,
+    db: Session,
+    program_id: int,
+    doc_type: str,
+    section_name: str,
+) -> dict[str, Any]:
+    """
+    Regenerate one named section for program_id without touching the others.
+
+    Returns {section_name: <section output dict>, "_tracking": {section_name: ...}}.
+    Raises ValueError if doc_type or section_name is unknown.
+    """
+    if doc_type not in SECTION_MAP:
+        raise ValueError(f"Unknown doc_type: {doc_type!r}")
+
+    section_defs = SECTION_MAP[doc_type]
+    sec = next((s for s in section_defs if s.name == section_name), None)
+    if sec is None:
+        known = [s.name for s in section_defs]
+        raise ValueError(f"Unknown section {section_name!r} for {doc_type!r}. Known: {known}")
+
+    full_facts = _load_program_data(db, program_id)
+    program = full_facts.pop("_program")
+    rules_result = full_facts.pop("_rules_result")
+
+    chunks = _retrieve_chunks_for_section(db, program_id, sec, full_facts)
+    style_excerpt = _get_exemplar_style(db, program_id, doc_type, sec.exemplar_pattern)
+    fact_pack = _slice_fact_pack(full_facts, sec.fact_keys)
+
+    logger.info("Regenerating section '%s' for program %d (%s)", sec.name, program_id, doc_type)
+    output = generate_section(
+        section_name=sec.name,
+        section_instructions=sec.instructions,
+        doc_type=doc_type,
+        output_schema=sec.schema_class,
+        fact_pack=fact_pack,
+        retrieved_chunks=chunks,
+        modifiers=[m.value for m in rules_result.modifiers],
+        style_excerpt=style_excerpt,
+        program_name=program.name,
+    )
+    tracking = track_section(fact_pack, chunks, output)
+    return {
+        sec.name: output,
+        "_tracking": {sec.name: tracking.model_dump()},
+    }
 
 
 def _retrieve_chunks_for_section(

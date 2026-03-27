@@ -87,6 +87,8 @@ with engine.connect() as _conn:
         # program_standards — applicability columns
         "ALTER TABLE program_standards ADD COLUMN IF NOT EXISTS applies_to_modules BOOLEAN NOT NULL DEFAULT FALSE",
         "ALTER TABLE program_standards ADD COLUMN IF NOT EXISTS applies_to_interfaces BOOLEAN NOT NULL DEFAULT FALSE",
+        # program_documents — section output snapshot for per-section regeneration
+        "ALTER TABLE program_documents ADD COLUMN IF NOT EXISTS assembled_json TEXT",
         # Embedding cache table (CREATE IF NOT EXISTS — fully idempotent)
         """
         CREATE TABLE IF NOT EXISTS embedding_cache (

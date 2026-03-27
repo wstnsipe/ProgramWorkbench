@@ -82,6 +82,7 @@ class ProgramDocument(Base):
     program_id = Column(Integer, ForeignKey("programs.id"), nullable=False, index=True)
     doc_type = Column(String, nullable=False)
     file_path = Column(String, nullable=False)
+    assembled_json = Column(Text, nullable=True)   # JSON snapshot of section outputs; enables per-section regen
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
