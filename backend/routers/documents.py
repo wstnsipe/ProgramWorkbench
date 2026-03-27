@@ -3,6 +3,8 @@
 """
 import os
 import uuid
+import threading
+import logging
 from typing import List
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -11,6 +13,17 @@ from sqlalchemy.orm import Session
 
 import models
 from database import get_db
+
+logger = logging.getLogger(__name__)
+
+# In-memory job status store (single-process deployment)
+_jobs: dict[str, dict] = {}
+_jobs_lock = threading.Lock()
+
+
+def _set_job(job_id: str, status: str, doc_id: int | None = None, error: str | None = None) -> None:
+    with _jobs_lock:
+        _jobs[job_id] = {"job_id": job_id, "status": status, "doc_id": doc_id, "error": error}
 from contracts import (
     DocumentOut, GenerateDocIn as GenerateDocRequestV2, GenerateDocOut,
     RegenerateSectionIn, RegenerateSectionOut,
@@ -34,6 +47,21 @@ def list_documents(program_id: int, db: Session = Depends(get_db)):
     """GET /programs/{program_id}/documents"""
     _require_program(program_id, db)
     return db.query(models.ProgramDocument).filter_by(program_id=program_id).all()
+
+
+@router.get("/jobs/{job_id}")
+def get_job_status(program_id: int, job_id: str):
+    """
+    GET /programs/{program_id}/documents/jobs/{job_id}
+    Poll generation job status. Returns {job_id, status, doc_id, error}.
+    status: "queued" | "generating" | "done" | "error"
+    """
+    _require_program  # already validates program exists via the prefix
+    with _jobs_lock:
+        job = _jobs.get(job_id)
+    if not job:
+        raise HTTPException(404, f"Job {job_id!r} not found")
+    return job
 
 
 @router.post("/generate", response_model=GenerateDocOut, status_code=202)
@@ -245,15 +273,14 @@ def _run_generation(program_id: int, doc_type: str, output_path: str, job_id: st
     """
     import json
     from database import SessionLocal
+    _set_job(job_id, "generating")
     db = SessionLocal()
     try:
         from generation.orchestrator import generate_document as _gen
         assembled = _gen(db=db, program_id=program_id, doc_type=doc_type, output_path=output_path)
 
-        # Render to DOCX using existing docx_builder
         _render_to_docx(assembled, doc_type, output_path, program_id, db)
 
-        # Persist record — store assembled JSON so individual sections can be patched later
         doc_row = models.ProgramDocument(
             program_id=program_id,
             doc_type=doc_type,
@@ -262,27 +289,20 @@ def _run_generation(program_id: int, doc_type: str, output_path: str, job_id: st
         )
         db.add(doc_row)
         db.commit()
+        db.refresh(doc_row)
+        _set_job(job_id, "done", doc_id=doc_row.id)
     except Exception as exc:
-        import logging
-        logging.getLogger(__name__).error(
-            "Generation job %s failed: %s", job_id, exc, exc_info=True
-        )
+        logger.error("Generation job %s failed: %s", job_id, exc, exc_info=True)
         db.rollback()
+        _set_job(job_id, "error", error=str(exc))
     finally:
         db.close()
 
 
-def _render_to_docx(assembled: dict, doc_type: str, output_path: str, program_id: int, db):
+def _render_to_docx(assembled: dict, doc_type: str, output_path: str, program_id: int, db) -> None:
     """
-    Bridge to existing docx_builder until generation/renderer.py is complete.
-    Falls back to calling the existing main.py generation function.
+    Render assembled section dict to a .docx file.
+    Uses the new renderer; raises on failure so caller can track the error.
     """
-    try:
-        from generation.renderer import render_document
-        render_document(assembled=assembled, doc_type=doc_type, output_path=output_path)
-    except ImportError:
-        # Fallback: call existing docx_builder directly
-        import docx_builder
-        build_fn = getattr(docx_builder, f"build_{doc_type}_docx", None)
-        if build_fn:
-            build_fn(assembled, output_path)
+    from generation.renderer import render_document
+    render_document(assembled=assembled, doc_type=doc_type, output_path=output_path)

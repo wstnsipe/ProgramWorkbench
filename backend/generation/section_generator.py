@@ -92,6 +92,7 @@ def generate_section(
     modifiers: list[str],
     style_excerpt: Optional[str] = None,
     program_name: str = "the program",
+    max_tokens: int = 2048,
 ) -> dict[str, Any]:
     """
     Generate one section and return a validated dict.
@@ -137,7 +138,7 @@ def generate_section(
                 messages=messages,
                 response_format={"type": "json_object"},
                 temperature=0.3,
-                max_tokens=2048,
+                max_tokens=max_tokens,
             )
             raw = resp.choices[0].message.content or "{}"
             data = json.loads(raw)

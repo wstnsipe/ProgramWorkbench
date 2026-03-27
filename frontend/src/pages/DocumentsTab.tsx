@@ -58,17 +58,38 @@ export default function DocumentsTab({ programId }: Props) {
     setGenerating(docType)
     setToast(null)
     try {
-      const res = await fetch(`${API}/programs/${programId}/documents/generate`, {
+      // Start generation — returns job_id immediately (202 Accepted)
+      const startRes = await fetch(`${API}/programs/${programId}/documents/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ doc_types: [docType] }),
+        body: JSON.stringify({ doc_type: docType }),   // singular doc_type, not doc_types array
       })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.detail || 'Generation failed')
+      if (!startRes.ok) {
+        const data = await startRes.json().catch(() => ({}))
+        throw new Error(data.detail || 'Failed to start generation')
       }
-      await fetchDocs()
-      setToast({ kind: 'success', message: 'Document generated' })
+      const { job_id } = await startRes.json()
+
+      // Poll until done or error (max 3 minutes)
+      const deadline = Date.now() + 3 * 60 * 1000
+      while (Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 3000))
+        const pollRes = await fetch(
+          `${API}/programs/${programId}/documents/jobs/${job_id}`
+        )
+        if (!pollRes.ok) break
+        const job = await pollRes.json()
+        if (job.status === 'done') {
+          await fetchDocs()
+          setToast({ kind: 'success', message: 'Document generated' })
+          return
+        }
+        if (job.status === 'error') {
+          throw new Error(job.error || 'Generation failed')
+        }
+        // status === 'queued' or 'generating' — keep polling
+      }
+      throw new Error('Generation timed out')
     } catch (e: unknown) {
       setToast({ kind: 'error', message: e instanceof Error ? e.message : 'Generation failed' })
     } finally {

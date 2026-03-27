@@ -62,6 +62,21 @@ async def upload_files(
     db.commit()
     for row in created:
         db.refresh(row)
+
+    # For exemplar files, extract section-style excerpts in background
+    if source_type == "exemplar":
+        for row in created:
+            try:
+                from services.exemplar_service import extract_exemplar_styles
+                full_path = os.path.join(UPLOAD_ROOT, row.relative_path)
+                extract_exemplar_styles(db=db, file_row=row, file_path=full_path)
+            except Exception as exc:
+                # Non-fatal — log and continue
+                import logging
+                logging.getLogger(__name__).warning(
+                    "Exemplar style extraction failed for %s: %s", row.filename, exc
+                )
+
     return created
 
 

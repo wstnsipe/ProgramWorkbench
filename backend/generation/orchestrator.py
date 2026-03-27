@@ -52,6 +52,7 @@ class SectionDef:
     instructions: str           # ≤25-line system prompt instructions for this section
     fact_keys: list[str]        # keys from full fact pack to include
     exemplar_pattern: str       # heading keyword to match in exemplar
+    max_tokens: int = 2048      # token budget for this section's LLM call
 
 
 _RFI_SECTIONS: list[SectionDef] = [
@@ -113,6 +114,7 @@ _ACQ_STRATEGY_SECTIONS: list[SectionDef] = [
         instructions="Generate 4–6 acquisition risks with probability/impact/mitigation. Ground in module flags, tech_challenges, and rule_violations.",
         fact_keys=["modules", "modifiers", "mission_critical", "safety_critical", "tech_challenges", "obsolescence_candidates", "rule_violations", "rules_flags"],
         exemplar_pattern="risk",
+        max_tokens=3072,
     ),
     SectionDef(
         name="MOSA & Data Rights",
@@ -129,6 +131,7 @@ _ACQ_STRATEGY_SECTIONS: list[SectionDef] = [
         ),
         fact_keys=["modules", "mig_id", "standards", "scenarios", "commercial_solutions", "obsolescence_candidates", "rule_violations", "rules_flags"],
         exemplar_pattern="mosa",
+        max_tokens=4096,
     ),
     SectionDef(
         name="Contracting Strategy",
@@ -162,6 +165,7 @@ _SEP_SECTIONS: list[SectionDef] = [
         ),
         fact_keys=["modules", "standards", "mig_id", "scenarios", "software_standards", "rules_flags"],
         exemplar_pattern="architecture",
+        max_tokens=3072,
     ),
     SectionDef(
         name="Risk Management",
@@ -203,6 +207,7 @@ _MCP_SECTIONS: list[SectionDef] = [
         ),
         fact_keys=["modules", "standards", "scenarios", "rule_violations", "obsolescence_candidates"],
         exemplar_pattern="module",
+        max_tokens=4096,
     ),
     SectionDef(
         name="Verification Milestones",
@@ -418,6 +423,7 @@ def generate_document(
             modifiers=[m.value for m in rules_result.modifiers],
             style_excerpt=style_excerpt,
             program_name=program.name,
+            max_tokens=sec.max_tokens,
         )
         assembled[sec.name] = section_output
 
@@ -476,6 +482,7 @@ def generate_single_section(
         modifiers=[m.value for m in rules_result.modifiers],
         style_excerpt=style_excerpt,
         program_name=program.name,
+        max_tokens=sec.max_tokens,
     )
     tracking = track_section(fact_pack, chunks, output)
     return {
@@ -491,17 +498,44 @@ def _retrieve_chunks_for_section(
     full_facts: dict,
 ) -> list[str]:
     """
-    Retrieve relevant chunks for a section using a simple keyword query.
-    Replace with hybrid search once llm/retrieval.py is upgraded.
+    Hybrid retrieval: vector search over user-uploaded files + keyword search
+    over global reference docs (MIGs, policies indexed at startup).
     """
+    query = f"{sec.name} {full_facts.get('program_description', '')} {full_facts.get('program_name', '')}"
+    collected: list[str] = []
+
+    # Vector search over user-uploaded embedded files
     try:
         from llm.retrieval import retrieve_chunks_vector
-        query = f"{sec.name} {full_facts.get('program_description', '')} {full_facts.get('program_name', '')}"
-        results = retrieve_chunks_vector(db=db, program_id=program_id, query=query, top_k=6)
-        return [r.chunk_text for r in results]
+        vector_results = retrieve_chunks_vector(db=db, program_id=program_id, query=query, top_k=4)
+        collected.extend(r["chunk_text"] for r in vector_results)
     except Exception as exc:
-        logger.warning("Chunk retrieval failed for section '%s': %s", sec.name, exc)
-        return []
+        logger.warning("Vector retrieval failed for section '%s': %s", sec.name, exc)
+
+    # Keyword search over global reference docs (MIGs, policies) + program RagChunks
+    try:
+        from llm.retrieval import retrieve_chunks
+        mig_id = full_facts.get("mig_id") or ""
+        keyword_results = retrieve_chunks(
+            queries=[sec.name, mig_id, full_facts.get("program_name", "")],
+            db=db,
+            program_id=program_id,
+            top_k=4,
+        )
+        collected.extend(r["chunk_text"] for r in keyword_results)
+    except Exception as exc:
+        logger.warning("Keyword retrieval failed for section '%s': %s", sec.name, exc)
+
+    # Deduplicate preserving order, cap at 6
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for chunk in collected:
+        if chunk not in seen:
+            seen.add(chunk)
+            deduped.append(chunk)
+        if len(deduped) == 6:
+            break
+    return deduped
 
 
 def _get_exemplar_style(
