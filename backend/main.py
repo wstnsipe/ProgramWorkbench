@@ -84,6 +84,10 @@ with engine.connect() as _conn:
         "ALTER TABLE programs ADD COLUMN IF NOT EXISTS army_pae TEXT",
         "ALTER TABLE programs ADD COLUMN IF NOT EXISTS army_branch TEXT",
         "ALTER TABLE programs ADD COLUMN IF NOT EXISTS mig_id TEXT",
+        # program_briefs — columns added after initial deploy
+        "ALTER TABLE program_briefs ADD COLUMN IF NOT EXISTS timeline_months INTEGER",
+        "ALTER TABLE program_briefs ADD COLUMN IF NOT EXISTS software_involved BOOLEAN",
+        "ALTER TABLE program_briefs ADD COLUMN IF NOT EXISTS similar_programs_exist BOOLEAN",
         # program_standards — applicability columns
         "ALTER TABLE program_standards ADD COLUMN IF NOT EXISTS applies_to_modules BOOLEAN NOT NULL DEFAULT FALSE",
         "ALTER TABLE program_standards ADD COLUMN IF NOT EXISTS applies_to_interfaces BOOLEAN NOT NULL DEFAULT FALSE",

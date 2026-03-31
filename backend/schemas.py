@@ -19,11 +19,14 @@ class ProgramBriefIn(BaseModel):
     program_description: Optional[str] = None
     dev_cost_estimate: Optional[float] = None
     production_unit_cost: Optional[float] = None
+    timeline_months: Optional[int] = None
     attritable: Optional[bool] = None
     sustainment_tail: Optional[bool] = None
     software_large_part: Optional[bool] = None
+    software_involved: Optional[bool] = None
     mission_critical: Optional[bool] = None
     safety_critical: Optional[bool] = None
+    similar_programs_exist: Optional[bool] = None
 
 
 class ProgramBriefOut(ProgramBriefIn):
