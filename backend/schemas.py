@@ -10,9 +10,20 @@ class ProgramCreate(BaseModel):
 class ProgramOut(BaseModel):
     id: int
     name: str
+    service_branch: Optional[str] = None
+    army_pae: Optional[str] = None
+    army_branch: Optional[str] = None
+    mig_id: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+
+class ProgramUpdate(BaseModel):
+    name: Optional[str] = None
+    service_branch: Optional[str] = None
+    army_pae: Optional[str] = None
+    army_branch: Optional[str] = None
 
 
 class ProgramBriefIn(BaseModel):

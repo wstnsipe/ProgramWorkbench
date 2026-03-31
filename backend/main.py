@@ -22,7 +22,7 @@ from docx_builder import (
 )
 from models import Base, Program, ProgramBrief, ProgramFile, ProgramAnswer, Module, ProgramDocument, FileText, FileChunk, RagChunk
 from schemas import (
-    ProgramCreate, ProgramOut, ProgramBriefIn, ProgramBriefOut, ProgramFileOut,
+    ProgramCreate, ProgramOut, ProgramUpdate, ProgramBriefIn, ProgramBriefOut, ProgramFileOut,
     WizardOut, WizardAnswersIn, ModuleIn, ModuleOut,
     GenerateDocRequest, DocumentOut,
     FileTextOut, FileChunkOut, KnowledgeSummaryOut, KnowledgeFileSummary, KnowledgeStats,
@@ -312,6 +312,18 @@ def get_program(program_id: int, db: Session = Depends(get_db)):
     program = db.query(Program).filter(Program.id == program_id).first()
     if not program:
         raise HTTPException(status_code=404, detail="Program not found")
+    return program
+
+
+@app.patch("/programs/{program_id}", response_model=ProgramOut)
+def update_program(program_id: int, payload: ProgramUpdate, db: Session = Depends(get_db)):
+    program = db.query(Program).filter(Program.id == program_id).first()
+    if not program:
+        raise HTTPException(status_code=404, detail="Program not found")
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(program, field, value)
+    db.commit()
+    db.refresh(program)
     return program
 
 
