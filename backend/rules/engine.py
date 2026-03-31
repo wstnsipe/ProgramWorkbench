@@ -22,8 +22,9 @@ _SERVICE_TO_MIG: dict[str, str] = {
 }
 
 _ARMY_PAE_TO_MIG: dict[str, str] = {
-    "PM_PEO_C3T": "MIG-ARMY-C3T-2022",
-    "PM_PEO_IEW_S": "MIG-ARMY-IEWS-2022",
+    "PAE_FIRES":    "MIG-ARMY-2022",
+    "PAE_AIR":      "MIG-ARMY-2022",
+    "PAE_MANEUVER": "MIG-ARMY-2022",
 }
 
 # ---------------------------------------------------------------------------

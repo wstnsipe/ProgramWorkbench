@@ -52,6 +52,7 @@ try:
             ALTER TABLE program_files ADD COLUMN IF NOT EXISTS extracted_text TEXT;
             ALTER TABLE program_files ADD COLUMN IF NOT EXISTS source_type TEXT NOT NULL DEFAULT 'program_input';
             ALTER TABLE file_chunks ADD COLUMN IF NOT EXISTS source_type TEXT NOT NULL DEFAULT 'program_input';
+            ALTER TABLE program_standards ADD COLUMN IF NOT EXISTS module_name TEXT;
         """))
         _conn.commit()
 except Exception:

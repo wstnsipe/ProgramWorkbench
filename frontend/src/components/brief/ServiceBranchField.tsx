@@ -1,10 +1,9 @@
-import type { ServiceBranch, ArmyBranch } from '../../types'
+import type { ServiceBranch } from '../../types'
 
 interface Props {
   value: ServiceBranch | null
   armyPae: string | null
-  armyBranch: ArmyBranch | null
-  onChange: (branch: ServiceBranch | null, pae?: string | null, armyBranch?: ArmyBranch | null) => void
+  onChange: (branch: ServiceBranch | null, pae?: string | null) => void
   disabled?: boolean
 }
 
@@ -16,19 +15,12 @@ const BRANCHES: { value: ServiceBranch; label: string; mig: string }[] = [
 ]
 
 const ARMY_PAE_OPTIONS = [
-  { value: 'PM_PEO_C3T',    label: 'PM PEO C3T' },
-  { value: 'PM_PEO_IEW_S',  label: 'PM PEO IEW&S' },
-  { value: 'PM_PEO_CS_CSS', label: 'PM PEO CS&CSS' },
-  { value: 'OTHER',         label: 'Other Army' },
+  { value: 'PAE_FIRES',    label: 'PAE Fires'   },
+  { value: 'PAE_AIR',      label: 'PAE Air'     },
+  { value: 'PAE_MANEUVER', label: 'PAE Maneuver' },
 ]
 
-const ARMY_BRANCH_OPTIONS: { value: ArmyBranch; label: string }[] = [
-  { value: 'FIRES',    label: 'Fires' },
-  { value: 'MANEUVER', label: 'Maneuver' },
-  { value: 'AVIATION', label: 'Aviation' },
-]
-
-export default function ServiceBranchField({ value, armyPae, armyBranch, onChange, disabled }: Props) {
+export default function ServiceBranchField({ value, armyPae, onChange, disabled }: Props) {
   return (
     <div className="service-branch-field">
       <div className="branch-options">
@@ -42,7 +34,7 @@ export default function ServiceBranchField({ value, armyPae, armyBranch, onChang
               name="service_branch"
               value={b.value}
               checked={value === b.value}
-              onChange={() => onChange(b.value, b.value !== 'ARMY' ? null : armyPae, b.value !== 'ARMY' ? null : armyBranch)}
+              onChange={() => onChange(b.value, b.value !== 'ARMY' ? null : armyPae)}
               disabled={disabled}
             />
             <span className="branch-option__label">{b.label}</span>
@@ -54,33 +46,17 @@ export default function ServiceBranchField({ value, armyPae, armyBranch, onChang
       {value === 'ARMY' && (
         <div className="army-pae-field">
           <label className="field-label" htmlFor="army_pae">
-            <span>Army PAE (Program Executive Office)</span>
-            <span className="field-label__helper">Selects MIG sub-variant</span>
+            <span>Army PAE</span>
+            <span className="field-label__helper">Portfolio Acquisition Executive</span>
           </label>
           <select
             id="army_pae"
             value={armyPae ?? ''}
-            onChange={e => onChange('ARMY', e.target.value || null, armyBranch)}
+            onChange={e => onChange('ARMY', e.target.value || null)}
             disabled={disabled}
           >
             <option value="">— Select PAE —</option>
             {ARMY_PAE_OPTIONS.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-
-          <label className="field-label" htmlFor="army_branch" style={{ marginTop: '0.75rem' }}>
-            <span>Army Branch</span>
-            <span className="field-label__helper">Acquisition community</span>
-          </label>
-          <select
-            id="army_branch"
-            value={armyBranch ?? ''}
-            onChange={e => onChange('ARMY', armyPae, (e.target.value as ArmyBranch) || null)}
-            disabled={disabled}
-          >
-            <option value="">— Select Branch —</option>
-            {ARMY_BRANCH_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>

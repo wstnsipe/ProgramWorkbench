@@ -50,9 +50,9 @@ class ProgramStandard(Base):
     id = Column(Integer, primary_key=True, index=True)
     program_id = Column(Integer, ForeignKey("programs.id"), nullable=False, index=True)
     standard_name = Column(String, nullable=False)
+    module_name = Column(String, nullable=True)   # which module this standard applies to
     applies = Column(Boolean, nullable=False, default=True)
-    applies_to_modules = Column(Boolean, nullable=False, default=False, server_default='false')
-    applies_to_interfaces = Column(Boolean, nullable=False, default=False, server_default='false')
+    applies_to_modules = Column(Boolean, nullable=False, default=True, server_default='true')
     # catalog_id for future recommendation-hook integration
     catalog_id = Column(String, nullable=True)
     notes = Column(Text, nullable=True)

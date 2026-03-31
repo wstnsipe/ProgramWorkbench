@@ -36,7 +36,6 @@ export default function ModuleListEditor({ rows, onUpdate, onAdd, onRemove, base
             <th className="module-table__col-name">Module Name <span className="required-star">*</span></th>
             <th className="module-table__col-text">Description</th>
             <th className="module-table__col-text">Rationale</th>
-            <th className="module-table__col-text">Key Interfaces</th>
             {BOOL_COLS.map(c => (
               <th key={c.field} className="module-table__col-check" title={c.label}>{c.abbrev}</th>
             ))}
@@ -74,15 +73,6 @@ export default function ModuleListEditor({ rows, onUpdate, onAdd, onRemove, base
                   onChange={e => onUpdate(i, 'rationale', e.target.value)}
                   placeholder="Why a module?"
                   aria-label={`Module ${i + 1} rationale`}
-                />
-              </td>
-              <td>
-                <input
-                  className="module-table__input"
-                  value={row.key_interfaces}
-                  onChange={e => onUpdate(i, 'key_interfaces', e.target.value)}
-                  placeholder="FACE, SOSA…"
-                  aria-label={`Module ${i + 1} interfaces`}
                 />
               </td>
               {BOOL_COLS.map(c => (

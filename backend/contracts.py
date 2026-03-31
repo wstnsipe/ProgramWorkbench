@@ -15,7 +15,8 @@ Naming rules
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 from enum import Enum
-from pydantic import BaseModel, Field
+import re
+from pydantic import BaseModel, Field, field_validator
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -27,12 +28,6 @@ class ServiceBranch(str, Enum):
     USAF = "USAF"
     USSF = "USSF"
     ARMY = "ARMY"
-
-
-class ArmyBranch(str, Enum):
-    FIRES    = "FIRES"
-    MANEUVER = "MANEUVER"
-    AVIATION = "AVIATION"
 
 
 class DocType(str, Enum):
@@ -76,7 +71,6 @@ class ProgramIn(BaseModel):
     name: str
     service_branch: Optional[ServiceBranch] = None
     army_pae: Optional[str] = None
-    army_branch: Optional[ArmyBranch] = None
 
 
 class ProgramPatch(BaseModel):
@@ -84,7 +78,6 @@ class ProgramPatch(BaseModel):
     name: Optional[str] = None
     service_branch: Optional[ServiceBranch] = None
     army_pae: Optional[str] = None
-    army_branch: Optional[ArmyBranch] = None
 
 
 class ProgramOut(BaseModel):
@@ -93,7 +86,6 @@ class ProgramOut(BaseModel):
     name: str
     service_branch: Optional[str] = None
     army_pae: Optional[str] = None
-    army_branch: Optional[str] = None
     mig_id: Optional[str] = None
 
     model_config = {"from_attributes": True}
@@ -161,11 +153,26 @@ class ModulesBulkIn(BaseModel):
 # MOSA Scenarios
 # ─────────────────────────────────────────────────────────────────────────────
 
+_MOSA_FORMAT_RE = re.compile(
+    r'^For the .+ module, the USG desires the ability to ', re.IGNORECASE
+)
+
+
 class ScenarioIn(BaseModel):
     """Single scenario (used inside ScenariosBulkIn)"""
     scenario_type: ScenarioType
     module_name: Optional[str] = None
     description: Optional[str] = None
+
+    @field_validator('description')
+    @classmethod
+    def description_format(cls, v: Optional[str]) -> Optional[str]:
+        if v and v.strip() and not _MOSA_FORMAT_RE.match(v.strip()):
+            raise ValueError(
+                'Scenario description must start with: '
+                '"For the [module name] module, the USG desires the ability to …"'
+            )
+        return v
 
 
 class ScenarioOut(ScenarioIn):
@@ -189,10 +196,10 @@ class ScenariosBulkIn(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 
 class StandardIn(BaseModel):
-    """Single standard (used inside StandardsBulkIn)"""
+    """Single standard (used inside StandardsBulkIn). Each row is one (module, standard) pair."""
     standard_name: str
-    applies_to_modules: bool = False
-    applies_to_interfaces: bool = False
+    module_name: Optional[str] = None
+    applies_to_modules: bool = True
     catalog_id: Optional[str] = None
     notes: Optional[str] = None
 
@@ -201,7 +208,6 @@ class StandardOut(StandardIn):
     """GET /programs/{id}/standards list item"""
     id: int
     program_id: int
-    # applies is kept for backward compatibility; derived as applies_to_modules | applies_to_interfaces
     applies: bool = False
     created_at: datetime
 

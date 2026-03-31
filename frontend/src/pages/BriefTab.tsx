@@ -10,6 +10,7 @@ import { useScenarios } from '../hooks/useScenarios'
 import { useProgram } from '../hooks/useProgram'
 import { useStandards } from '../hooks/useStandards'
 import { usePrefill } from '../hooks/usePrefill'
+import { useMismatches } from '../hooks/useMismatches'
 import type { PrefillSuggestion } from '../hooks/usePrefill'
 import { moduleScenarioWarnings } from '../utils/moduleScenarioWarnings'
 import type { ModuleRow } from '../types'
@@ -140,12 +141,18 @@ export default function BriefTab({ programId }: { programId: string }) {
   )
   const { program, updateServiceBranch, saveStatus: branchSaveStatus } = useProgram(programId)
   const { scenarios, updateScenario, addScenario, removeScenario, save: saveScenarios } = useScenarios(programId)
-  const { rows: standards, toggleModules, toggleInterfaces, updateNotes, addCustomStandard, removeRow: removeStandard, save: saveStandards } = useStandards(programId)
+  const { rows: standards, setModuleStandards, save: saveStandards } = useStandards(programId)
   const { fetchPrefill, getSuggestion, dismiss, loading: prefillLoading } = usePrefill(programId)
-  const moduleScenarioAlerts = useMemo(
+  const { violations: mismatchViolations, refresh: refreshMismatches } = useMismatches(programId)
+  // Live local check for instant feedback; API violations (mismatchViolations) updated after save
+  const localAlerts = useMemo(
     () => moduleScenarioWarnings(modules, scenarios),
     [modules, scenarios],
   )
+  // Merge: API results take precedence when available, fall back to local
+  const moduleScenarioAlerts = mismatchViolations.length > 0
+    ? mismatchViolations.map(v => v.message)
+    : localAlerts
   const [mosarepoSearched, setMosarepoSearched] = useState('')
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -181,8 +188,6 @@ export default function BriefTab({ programId }: { programId: string }) {
           name: String(m.name ?? ''),
           description: String(m.description ?? ''),
           rationale: String(m.rationale ?? ''),
-          key_interfaces: String(m.key_interfaces ?? ''),
-          standards: String(m.standards ?? ''),
           tech_risk: Boolean(m.tech_risk),
           obsolescence_risk: Boolean(m.obsolescence_risk),
           cots_candidate: Boolean(m.cots_candidate),
@@ -236,12 +241,16 @@ export default function BriefTab({ programId }: { programId: string }) {
         safety_critical: form.safety_critical,
       }
 
+      // Derive software standards text from structured StandardsEditor rows
+      const derivedStandards = [...new Set(standards.map(r => r.standard_name))].join(', ')
+
       const wizardPayload: Record<string, unknown> = {
         // Mirror brief fields into wizard answers for document generation
         a_program_description: form.program_description || '',
         b_dev_cost_estimate: form.dev_cost_estimate || '',
         c_production_unit_cost: form.production_unit_cost || '',
         ...wizardAnswers,
+        n_software_standards_architectures: derivedStandards,
         o_mosa_repo_searched: mosarepoSearched,
       }
 
@@ -273,6 +282,7 @@ export default function BriefTab({ programId }: { programId: string }) {
 
       const brief: ProgramBrief = await briefRes.json()
       setUpdatedAt(brief.updated_at)
+      refreshMismatches()
       setToast({ kind: 'success', message: 'Saved' })
     } catch {
       setToast({ kind: 'error', message: 'Network error' })
@@ -294,10 +304,7 @@ export default function BriefTab({ programId }: { programId: string }) {
           <ServiceBranchField
             value={program?.service_branch ?? null}
             armyPae={program?.army_pae ?? null}
-            armyBranch={program?.army_branch ?? null}
-            onChange={(branch, pae, armyBranch) =>
-              updateServiceBranch(branch, pae, armyBranch)
-            }
+            onChange={(branch, pae) => updateServiceBranch(branch, pae)}
           />
           {branchSaveStatus === 'saving' && <p className="save-status">Saving…</p>}
           {branchSaveStatus === 'saved'  && <p className="save-status">Saved</p>}
@@ -492,11 +499,8 @@ export default function BriefTab({ programId }: { programId: string }) {
         <div className="form-card__body">
           <StandardsEditor
             rows={standards}
-            onToggleModules={toggleModules}
-            onToggleInterfaces={toggleInterfaces}
-            onUpdateNotes={updateNotes}
-            onAddCustom={addCustomStandard}
-            onRemove={removeStandard}
+            modules={modules}
+            onSetModuleStandards={setModuleStandards}
           />
         </div>
       </div>
@@ -532,24 +536,6 @@ export default function BriefTab({ programId }: { programId: string }) {
               value={wizardAnswers['k_commercial_solutions_by_module'] ?? ''}
               onChange={e => handleWizardText('k_commercial_solutions_by_module', e.target.value)}
               placeholder="Describe commercial solutions available for each module…"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Software Standards & Architectures */}
-      <div className="form-card">
-        <div className="form-card__header">
-          <h3 className="form-card__title">Software Standards and Architectures</h3>
-          <p className="form-card__desc">Identify applicable software standards, architectural frameworks, and best practices (e.g., FACE Technical Standard, POSIX, AUTOSAR, DO-178C, IEC 61508).</p>
-        </div>
-        <div className="form-card__body">
-          <div className="form-field">
-            <textarea
-              rows={4}
-              value={wizardAnswers['n_software_standards_architectures'] ?? ''}
-              onChange={e => handleWizardText('n_software_standards_architectures', e.target.value)}
-              placeholder="Describe applicable software standards and architectures…"
             />
           </div>
         </div>

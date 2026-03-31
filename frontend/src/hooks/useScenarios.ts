@@ -20,11 +20,6 @@ function padRows(rows: ScenarioRow[]): ScenarioRow[] {
   return result
 }
 
-/** Auto-extract module name from "For the X module..." prefix */
-function extractModuleName(text: string): string {
-  const match = text.match(/^[Ff]or (?:the )?([^,.]+?) module/i)
-  return match ? match[1].trim() : ''
-}
 
 export function useScenarios(programId: string | number) {
   const [scenarios, setScenarios] = useState<ScenarioRow[]>(DEFAULT_SCENARIOS)
@@ -47,14 +42,7 @@ export function useScenarios(programId: string | number) {
   const updateScenario = useCallback((index: number, field: keyof ScenarioRow, value: string) => {
     setScenarios(prev => {
       const next = [...prev]
-      const updated = { ...next[index], [field]: value }
-      if (field === 'description') {
-        const extracted = extractModuleName(value)
-        if (extracted && !next[index].module_name) {
-          updated.module_name = extracted
-        }
-      }
-      next[index] = updated
+      next[index] = { ...next[index], [field]: value }
       return next
     })
   }, [])

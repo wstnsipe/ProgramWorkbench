@@ -32,7 +32,7 @@ export const createProgram = (payload: ProgramCreatePayload): Promise<Program> =
 
 export const updateProgram = (
   id: number | string,
-  payload: Partial<Pick<Program, 'name' | 'service_branch' | 'army_pae' | 'army_branch'>>,
+  payload: Partial<Pick<Program, 'name' | 'service_branch' | 'army_pae'>>,
 ): Promise<Program> =>
   apiPatch(`/programs/${id}`, payload)
 
@@ -88,6 +88,9 @@ export const replaceModules = (
 
 export const deleteModule = (programId: number | string, moduleId: number): Promise<void> =>
   apiDelete(`/programs/${programId}/modules/${moduleId}`)
+
+export const listMismatches = (programId: number | string): Promise<import('../types').RuleViolation[]> =>
+  apiGet(`/programs/${programId}/modules/mismatches`)
 
 // ── Scenarios ─────────────────────────────────────────────────────────────────
 

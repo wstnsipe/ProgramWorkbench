@@ -76,6 +76,7 @@ def get_module_mismatches(program_id: int, db: Session = Depends(get_db)):
     _require_program(program_id, db)
     modules = db.query(models.Module).filter_by(program_id=program_id).all()
     module_names = [m.name for m in modules]
+    module_descriptions = [getattr(m, 'description', None) or "" for m in modules]
 
     scenario_module_names: list[str] = []
     scenario_descriptions: list[str] = []
@@ -87,7 +88,12 @@ def get_module_mismatches(program_id: int, db: Session = Depends(get_db)):
     except Exception:
         pass
 
-    return check_mismatches(module_names, scenario_module_names, scenario_descriptions)
+    return check_mismatches(
+        module_names,
+        scenario_module_names,
+        scenario_descriptions,
+        module_descriptions=module_descriptions,
+    )
 
 
 @router.delete("/{module_id}", status_code=204)

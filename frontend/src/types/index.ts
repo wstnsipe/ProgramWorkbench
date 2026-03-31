@@ -4,7 +4,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type ServiceBranch = 'USN' | 'USAF' | 'USSF' | 'ARMY'
-export type ArmyBranch = 'FIRES' | 'MANEUVER' | 'AVIATION'
 export type DocType = 'rfi' | 'acq_strategy' | 'sep' | 'mcp'
 export type ScenarioType = 'reprocure' | 'reuse' | 'recompete'
 export type SufficiencyLevel = 'GREEN' | 'YELLOW_HIGH' | 'YELLOW_LOW' | 'RED'
@@ -16,7 +15,6 @@ export interface Program {
   name: string
   service_branch: ServiceBranch | null
   army_pae: string | null
-  army_branch: ArmyBranch | null
   mig_id: string | null
 }
 
@@ -24,7 +22,6 @@ export interface ProgramCreatePayload {
   name: string
   service_branch?: ServiceBranch
   army_pae?: string
-  army_branch?: ArmyBranch
 }
 
 // ── Program Brief ─────────────────────────────────────────────────────────────
@@ -68,7 +65,6 @@ export interface Module {
   name: string
   description: string | null
   rationale: string | null
-  key_interfaces: string | null
   standards: string | null
   tech_risk: boolean
   obsolescence_risk: boolean
@@ -82,8 +78,6 @@ export interface ModuleRow {
   name: string
   description: string
   rationale: string
-  key_interfaces: string
-  standards: string
   tech_risk: boolean
   obsolescence_risk: boolean
   cots_candidate: boolean
@@ -94,8 +88,6 @@ export const EMPTY_MODULE_ROW: ModuleRow = {
   name: '',
   description: '',
   rationale: '',
-  key_interfaces: '',
-  standards: '',
   tech_risk: false,
   obsolescence_risk: false,
   cots_candidate: false,
@@ -139,45 +131,63 @@ export const SCENARIO_DESCRIPTIONS: Record<ScenarioType, string> = {
   recompete: 'Module contract is recompeted at end of period of performance using modular boundaries',
 }
 
+// ── Rule violations ───────────────────────────────────────────────────────────
+
+export interface RuleViolation {
+  rule_id: string
+  severity: 'ERROR' | 'WARN' | 'INFO'
+  message: string
+}
+
 // ── Standards ─────────────────────────────────────────────────────────────────
 
 export interface ProgramStandard {
   id: number
   program_id: number
   standard_name: string
-  applies: boolean              // derived: applies_to_modules | applies_to_interfaces
+  module_name: string | null
+  applies: boolean
   applies_to_modules: boolean
-  applies_to_interfaces: boolean
   catalog_id: string | null
   notes: string | null
   created_at: string
 }
 
+/** One DB row = one (module, standard) pair */
 export interface StandardRow {
+  module_name: string | null
   standard_name: string
   applies_to_modules: boolean
-  applies_to_interfaces: boolean
   catalog_id: string | null
   notes: string
 }
 
-/** The 4 pre-seeded rows shown when no data exists yet. */
-export const DEFAULT_STANDARDS_COUNT = 4
+/** Predefined standards available in the multi-select dropdown */
+export interface StandardOption {
+  name: string
+  catalog_id: string | null
+}
 
-export const DEFAULT_STANDARD_ROWS: StandardRow[] = [
-  { standard_name: 'FACE Technical Standard',   applies_to_modules: false, applies_to_interfaces: false, catalog_id: 'FACE',        notes: '' },
-  { standard_name: 'VITA 65 (SOSA)',             applies_to_modules: false, applies_to_interfaces: false, catalog_id: 'SOSA',        notes: '' },
-  { standard_name: 'MIL-STD-461',                applies_to_modules: false, applies_to_interfaces: false, catalog_id: 'MIL_STD_461', notes: '' },
-  { standard_name: 'POSIX (IEEE 1003)',           applies_to_modules: false, applies_to_interfaces: false, catalog_id: 'POSIX',       notes: '' },
-]
-
-/** Catalog of known standards for the add-custom dropdown */
+/** Extended catalog entry (used by standardsCatalog.ts) */
 export interface StandardCatalogEntry {
   catalog_id: string
   name: string
   description: string
-  branches: ServiceBranch[]  // empty = all branches
+  branches: ServiceBranch[]
 }
+
+export const PREDEFINED_STANDARDS: StandardOption[] = [
+  { name: 'FACE Technical Standard',               catalog_id: 'FACE'        },
+  { name: 'VITA 65 (SOSA)',                         catalog_id: 'SOSA'        },
+  { name: 'Open Mission Systems (OMS)',             catalog_id: 'OMS'         },
+  { name: 'Generic Vehicle Architecture (GVA)',     catalog_id: 'GVA'         },
+  { name: 'CMOSS',                                  catalog_id: 'CMOSS'       },
+  { name: 'VICTORY',                                catalog_id: 'VICTORY'     },
+  { name: 'MIL-STD-461',                            catalog_id: 'MIL_STD_461' },
+  { name: 'POSIX (IEEE 1003)',                       catalog_id: 'POSIX'       },
+  { name: 'DO-178C',                                catalog_id: 'DO_178C'     },
+  { name: 'DO-254',                                 catalog_id: 'DO_254'      },
+]
 
 // ── Sufficiency ───────────────────────────────────────────────────────────────
 
